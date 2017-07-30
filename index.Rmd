@@ -1,0 +1,65 @@
+---
+title: "TCRENV 2017"
+author: "ICES Training Course in the R ENVironment"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Time and location
+
+__Time__: 2017-08-21 10:00 - 2017-08-25 16:00
+
+__Location__:
+```{r, fig.width = 9, fig.height = 3, message = FALSE, echo=FALSE}
+library(leaflet)
+content <- paste(sep = "<br/>",
+  "<b><a href='http://www.ices.dk'>ICES</a></b>",
+  "H. C. Andersens Boulevard 44-46",
+  "DK 1553 Copenhagen V, Denmark"
+)
+leaflet() %>% 
+  addTiles() %>% 
+  setView(lng = 12.575754, lat = 55.671455, zoom = 15) %>%
+   addPopups(12.575754, 55.671455, content,
+             options = popupOptions(closeButton = FALSE))
+```
+
+### Preamble
+___
+
+**Prior to the course** please install:
+
+* Latest version of __R__: see [The Comprehensive R Archive Network](https://cran.r-project.org/)
+    * If your platform is Windose, also install [Rtools](https://cran.r-project.org/bin/windows/Rtools)
+
+* Latest version of __RStudio__: see [RStudio Desktop](https://www.rstudio.com/products/rstudio/download/)
+    * If you are adventurous install the latest [developmental version](https://www.rstudio.com/products/rstudio/download/preview)
+
+For those that want to get a head we recommend the following reads:
+
+  * [R for Data Science](http://r4ds.had.co.nz)
+  * [A rendered version of the new ggplot2 book](http://www.hafro.is/~einarhj/education/ggplot2) (user name and password required)
+  
+We taught this course first time in ICES last year. Last years course [site](http://www.hafro.is/~einarhj/education/tcrenv2016) may give a hint of some of the stuff we cover this year, but expect updates, changes in data source used, etc.
+
+### Presentation
+___
+
+### Ad-hoc stuff
+___
+
+### Potential projects
+___
+
+### Background on some data used
+___
+
+
+### Post-hoc stuff
+___
+
+
+**The source for this space is found [here](https://github.com/fishvice/tcrenv2017).**
