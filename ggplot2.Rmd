@@ -1,0 +1,354 @@
+---
+title: "Getting started with ggplot2"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    fig_height: 4
+    fig_width: 8
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
+```
+
+```{r, echo = FALSE}
+#source("R/common.R")
+```
+
+# Preamble
+___
+
+#### Needed libraries for this tutorial:
+```{r, message = FALSE, warning = FALSE, results='hide'}
+library(ggplot2)
+theme_set(theme_grey(base_size = 16))
+```
+
+#### Getting example data into R
+```{r}
+d <- read.csv("http://www.hafro.is/~einarhj/data/minke.csv",
+              stringsAsFactors = FALSE)
+str(d)
+```
+
+
+# ggplot: Key components
+___
+
+ggplot has __three__ key components: 
+
+1.  __data__, this must be a `data.frame`
+
+2. A set of aesthetic mappings (`aes`) between variables in the data and 
+   visual properties, and 
+
+3. At least one `layer` which describes how to render each observation.
+
+
+```{r}
+ggplot(data = d) +
+  aes(x = age, y = length) + 
+  layer(geom = "point", stat = "identity", position = "identity")
+```
+
+Generally we do not call `layer` directly but use functions starting with `geom_` that are a shortcut calls to the `layer`-function. Hence the above call is normally written as:
+```{r, eval = FALSE}
+ggplot(data = d, aes(x = age, y = length)) + geom_point()
+```
+
+Different syntax, equivalent outcome:
+
+```{r, eval = FALSE}
+ggplot(d, aes(age, length)) + geom_point()
+ggplot()                    + geom_point(data = d, aes(age, length))
+ggplot(data = d)            + geom_point(aes(x = age, y = length))
+ggplot(d)                   + geom_point(aes(age, length))
+```
+
+Can be stored as an object for later use:
+
+```{r}
+p <- ggplot(d, aes(age, length)) + geom_point()
+```
+
+The class:
+```{r}
+class(p)
+```
+The structure (a bit of latin - not run here):
+```{r, eval = FALSE}
+str(p)
+```
+
+# aesthetic
+___
+
+Adding more variables to a two dimensional scatterplot can be done by mapping the variables to an aesthetic (colour, fill, size, shape, alpha)
+
+### colour
+
+```{r, out.width = "50%", fig.show = "hold"}
+p <- ggplot(d, aes(age, length))
+p + geom_point(aes(colour = sex))
+p + geom_point(aes(colour = area))
+```
+
+Manual control of colours or other palette schemes (here brewer):
+```{r, out.width = "50%", fig.show = "hold"}
+p + geom_point(aes(colour = sex)) +
+  scale_colour_manual(values = c("orange","brown"))
+p + geom_point(aes(colour = area)) +
+  scale_colour_brewer(palette = "Set1")
+```
+
+
+### shape
+```{r}
+p + geom_point(aes(age, length, shape = sex))
+```
+
+### size
+
+```{r}
+p + geom_point(aes(age, length, size = stomach.volume))
+```
+
+One can also "fix" the aesthetic manually, e.g.:
+
+```{r}
+ggplot(d, aes(age, length)) + geom_point(colour = "blue", shape = 8, size = 10)
+```
+
+Note here that the call to colour, shape, etc. is done outside the `aes`-call. One can also combine calls inside and outside the `aes`-function (here we showing overlay of adjacent datapoints):
+```{r}
+p + geom_point(aes(age, length, size = stomach.volume), alpha = 0.3, col = "red")
+```
+
+
+#### Exercise
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+Create a code that results in these plots:
+
+```{r, echo = FALSE, out.width = "50%", fig.show = "hold"}
+p + geom_point(aes(age, length, colour = maturity), size = 2) +
+  scale_color_brewer(palette = "Set1")
+p + geom_point(aes(age, length, shape = maturity), size = 2)
+```
+
+</div>
+</div>
+
+
+# Facetting
+___
+
+Splitting a graph into subsets based on a categorial variable. 
+
+```{r}
+ggplot(d) + 
+  geom_point(aes(age, length, colour = sex)) + 
+  facet_wrap(~ area)
+```
+
+Here, the variable area is used to spit the plot depending on the location of the sample ("North" and "South").
+
+One can also split the plot using two variables using the function `facet_grid` (here, a very useless plot):
+
+```{r}
+ggplot(d) +
+  geom_point(aes(age, length)) +
+  facet_grid(year ~ sex)
+```
+
+# Adding layers
+___
+
+... Say something here
+
+### Add a smoother to a plot
+
+```{r, out.width = "33%", fig.show = "hold"}
+p <- ggplot(d, aes(age, length))
+p + geom_point() + geom_smooth()
+p + geom_point() + geom_smooth(span = 0.1)
+p + geom_point() + geom_smooth(method = "lm")
+```
+
+The last plot a linear regression is fitted (check out ?lm).
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+Create a code that results in this plot:
+
+```{r, echo = FALSE}
+ggplot(d, aes(age, length, colour = sex)) + 
+  geom_point() + 
+  geom_smooth() +
+  facet_wrap(~ area) +
+  scale_colour_brewer(palette = "Set1")
+```
+
+</div>
+</div>
+
+# Statistical summaries
+___
+
+### bar plot
+
+One can create bar graph for discrete data using the `geom_bar`
+
+```{r}
+ggplot(d, aes(maturity)) + geom_bar()
+```
+
+The graph shows the number of observations we have of each maturity stage. Here the argument for stat in the `layer`function is no longer "identity" but "count":
+
+```{r, eval = FALSE}
+ggplot(d) +
+  aes(maturity) +
+  layer(geom = "bar", stat = "count", position = "identity")
+```
+
+So the original data is first transformed behind the scene, before being rendered. A simple way to think about this if we were just to generate a simple table of the counts we would do:
+```{r}
+table(d$maturity, useNA = "ifany")
+```
+
+### histograms
+
+For continous data one uses the 'geom_histogram'-function (left default bin-number, right bindwith specified as 50 cm): 
+
+```{r, out.width = "50%", fig.show = "hold"}
+p <- ggplot(d, aes(length))
+p + geom_histogram()
+p + geom_histogram(binwidth = 50)
+```
+
+One can add another varible (left) or better use facet (right):
+
+```{r, out.width = "50%", fig.show = "hold"}
+p + geom_histogram(aes(fill = sex))
+p + geom_histogram() + facet_wrap(~ sex, ncol = 1)
+```
+
+### Frequency polygons
+
+Alternatives to histograms for continuous data are frequency polyogons:
+```{r, out.width = "50%", fig.show = "hold"}
+p + geom_freqpoly(lwd = 1)
+p + geom_freqpoly(aes(colour = sex), lwd = 1)
+```
+
+### Box-plots
+
+Boxplots, which are more condensed summaries of the data than histograms, are called using `geom_boxplot`. Here two versions of the same graph are used, the one on the left is the default, but on the right we have reordered the maturity variable on the x-axis such that the median value of length increases from left to right:
+```{r, out.width = "50%", fig.show = "hold"}
+p <- ggplot(d, aes(maturity, length)) + geom_boxplot()
+p <- ggplot(d, aes(reorder(maturity, length), length)) + geom_boxplot()
+p
+```
+
+It is sometimes juseful to plot the "raw" data over summary plots. Using `geom_point` as an overlay of the above plot (left) is not very useful, `geom_jitter` coming to the rescue (right):
+```{r, out.width = "50%", fig.show = "hold"}
+p + geom_point(colour = "red", alpha = 0.5, size = 1)
+p + geom_jitter(colour = "red", alpha = 0.5, size = 1)
+```
+
+### Other statistical summaries
+
+Using `stat_summary` one can call specific summary statistics. Here are examples of 4 plots, going from top-left to bottom right we have:
+
+* Raw data with median lenght at age (red) superimposed
+* A pointrange plot showing the mean and the range
+* A pointrange plot showing the mean and the standard error
+* A pointrange plot showing the bootstrap mean and standard error
+
+```{r, out.width = "50%", fig.show = "hold"}
+d$age <- round(d$age)
+p <- ggplot(d, aes(age, length))
+p + geom_point(alpha = 0.25) + stat_summary(fun.y = "median", geom = "point", colour = "red")
+p + stat_summary(fun.y = "mean", fun.ymin = "min", fun.ymax = "max", geom = "pointrange")
+p + stat_summary(fun.data = "mean_se")
+p + stat_summary(fun.data = "mean_cl_boot")
+```
+
+# Some controls
+___
+
+### labels
+
+```{r}
+p <- ggplot(d, aes(age, length, colour = sex)) + geom_point()
+p <- p + labs(x = "Age [year]", y = "Length [cm]", 
+         colour = "Sex", 
+         title = "My minke plot",
+         subtitle = "My nice subtitle")
+p
+```
+
+### Legend position
+
+```{r, out.width = "50%", fig.show = "hold"}
+p + theme(legend.position = "none")
+p <- p + theme(legend.position = c(0.8, 0.3))
+p
+```
+
+### breaks
+
+Controls which values appear as tick marks
+
+```{r, out.width = "50%", fig.show = "hold"}
+p + scale_x_continuous(breaks = c(5, 10, 15, 20, 25, 30, 35, 40, 45))
+p +
+  scale_x_continuous(breaks = seq(5, 45, by = 5)) +
+  scale_y_continuous(breaks = seq(500, 950, by = 50))
+```
+
+### limits
+
+```{r, out.width = "33%", fig.show = "hold"}
+p <- ggplot(d, aes(maturity, length))
+p + geom_jitter()
+p + geom_jitter() + ylim(600, 800)
+p + geom_jitter() + ylim(NA, 800) # setting only upper limit
+```
+
+For descrete variables:
+
+```{r}
+p + geom_jitter() + ylim(600,800) + xlim("immature","mature")
+```
+
+#### warning
+
+But be careful when using with summary statistics, e.g.:
+
+```{r, out.width = "50%", fig.show = "hold"}
+p + geom_boxplot()
+p + geom_boxplot() + ylim(600, 800)
+```
+
+Remedy:
+
+```{r}
+p + geom_boxplot() + coord_cartesian(ylim = c(600, 800))
+```
+
+# Further readings
+___
+
+* The ggplot2 site: http://docs.ggplot2.org/current
+* The ggplot2 book in the making: https://github.com/hadley/ggplot2-book
+    - A rendered version of the book: http://www.hafro.is/~einarhj/education/ggplot2
+        - needs to be updates
+* R graphics cookbook: http://www.cookbook-r.com/Graphs/
+
