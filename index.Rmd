@@ -38,10 +38,9 @@ ___
 * Latest version of __RStudio__: see [RStudio Desktop](https://www.rstudio.com/products/rstudio/download/)
     * If you are adventurous install the latest [developmental version](https://www.rstudio.com/products/rstudio/download/preview)
 
-For those that want to get a head we recommend the following reads:
+For those that want to get a head we recommend the following read:
 
   * [R for Data Science](http://r4ds.had.co.nz)
-  * [A rendered version of the new ggplot2 book](http://www.hafro.is/~einarhj/education/ggplot2) (user name and password required)
   
 We taught this course first time in ICES last year. Last years course [site](http://www.hafro.is/~einarhj/education/tcrenv2016) may give a hint of some of the stuff we cover this year, but expect updates, changes in data source used, etc.
 
