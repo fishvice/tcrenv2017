@@ -2,19 +2,17 @@
 title: "Getting started with ggplot2"
 output: 
   html_document:
-    toc: true
-    toc_float: true
     fig_height: 4
     fig_width: 8
+    highlight: haddock
+    theme: united
+    toc: yes
+    toc_float: yes
 ---
 
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE)
-```
-
-```{r, echo = FALSE}
-#source("R/common.R")
 ```
 
 # Preamble
@@ -330,7 +328,7 @@ p + geom_jitter() + ylim(600,800) + xlim("immature","mature")
 
 #### warning
 
-But be careful when using with summary statistics, e.g.:
+But be careful when using lim with summary statistics, e.g.:
 
 ```{r, out.width = "50%", fig.show = "hold"}
 p + geom_boxplot()
