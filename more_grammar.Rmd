@@ -1,0 +1,467 @@
+---
+title: "More grammar"
+output: 
+  html_document:
+    fig_height: 4
+    fig_width: 8
+    highlight: haddock
+    theme: united
+    toc: yes
+    toc_float: yes
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
+```
+
+
+```{r}
+library(tidyverse)
+library(ggjoy)
+```
+
+# Preamble
+___
+
+# Importing
+___
+
+Download the raw data using the `getDATRAS` function from the [icesDatras](https://github.com/ices-tools-prod/icesDatras)-package and store it for later retrieval.
+
+```{r, eval = FALSE}
+# not run
+st <- icesDatras::getDATRAS("HH", "NS-IBTS", 1975:2017, 1)
+le <- icesDatras::getDATRAS("HL", "NS-IBTS", 1975:2017, 1)
+ag <- icesDatras::getDATRAS("CA", "NS-IBTS", 1975:2017, 1)
+
+nsibts_raw <- list(st = st, le = le, ag = ag)
+save(nsibts_raw, file = "data/nsibts_raw.rda")
+```
+
+# Tidying
+___
+
+### The station data
+
+<!-- Need to explain the area stuff -->
+
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+ns_area <- rgdal::readOGR("data-raw/NS_IBTS_RF.dbf", verbose = FALSE)
+ST <- nsibts_raw$st
+# Turn column names lower case
+colnames(ST) <- tolower(colnames(ST))
+ST <- 
+  ST %>% 
+  # create a unique station id
+  unite(id, year, quarter, ship, gear, haulno, remove = FALSE) %>%
+  # get proper date
+  mutate(timeshot = stringr::str_pad(timeshot, width = 4, side = "left", pad = "0"),
+         timeshot = paste0(stringr::str_sub(timeshot, 1, 2),
+                           ":",
+                           stringr::str_sub(timeshot, 3, 4)),
+         datetime = lubridate::ymd_hm(paste(year, month, day, timeshot))) %>% 
+  # Get roundfish area
+  mutate(area = gisland::geo_inside(shootlong, shootlat, ns_area, "AreaName")) %>% 
+  # only valid hauls
+  filter(haulval == "V",
+         # only in roundfish area
+         !is.na(area)) %>% 
+  # select only "needed" column
+  select(id, survey, year, quarter, ship, gear, haulno, hauldur,
+         shootlat, shootlong, datetime, depth, 
+         area, subarea = statrec, daynight, datatype) %>% 
+  tbl_df()
+```
+
+### The length data
+
+Processing:
+
+* Only distinct records (they are all distinct)
+* Filter out data were species code, length-code and length-class are undefined
+* Set lengths to millimeter. In the raw records:
+    - If **lngtcode** is "1" then the **lngtclass** is in centimeters
+    - If **lngtcode** is "." or "0" then the **lngclass** is in millimeters
+* Standardise the **haul numbers at length**. In the raw data:
+    - If **datatype** in the station table is "C" then **hlnoatlngt** has been standardized to 60 minutes haul
+    - If **datatype** in the station table is "R" then **hlnoatlngt** has not been standardized to 60 minutes haul
+* Get the latin species name from the `sp`-table
+* Select only variable that are needed in further processing
+    
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+# read in species code
+SP <- read_csv("data-raw/SPCODE.csv")
+LE <- nsibts_raw$le
+colnames(LE) <- tolower(colnames(LE))
+LE <-
+  LE %>%
+  distinct() %>%
+  filter(!is.na(speccode), !is.na(lngtclass), !is.na(lngtcode)) %>%
+  # EINAR - not sure if this is right, done here to test if any difference
+  #         (did though not help with respect to discrepancy here below)
+  #filter(specval == 1) %>% 
+  unite(id, year, quarter, ship, gear, haulno) %>%
+  # only stations that are in the station table (north sea ibts)
+  #  may be reduntant
+  filter(id %in% ST$id) %>% 
+  # length class to mm
+  mutate(length = ifelse(lngtcode %in% c("1"), lngtclass * 10, lngtclass),
+         hlnoatlngt = hlnoatlngt * subfactor) %>% 
+  # get the data type and hauldur
+  left_join(ST %>% select(id, datatype, hauldur)) %>% 
+  # catch per hour
+  mutate(n = ifelse(datatype == "R",
+                    hlnoatlngt * 60 / hauldur,
+                    hlnoatlngt)) %>% 
+  # join with latin name
+  left_join(SP) %>%
+  # select only needed columns
+  select(id, latin, sex, length, n) %>% 
+  tbl_df()
+```
+
+### The age data
+
+```{r, eval = FALSE}
+AG <- nsibts_raw$ag
+colnames(AG) <- tolower(colnames(AG))
+AG <- 
+  AG %>% 
+  unite(id, year, quarter, ship, gear, haulno) %>% 
+  # turn everything to cm
+  mutate(length = ifelse(!lngtcode %in% c("1"), lngtclass / 10, lngtclass), 
+         indwgt = ifelse(indwgt <= 0, NA, indwgt)) %>% 
+  left_join(SP) %>% 
+  select(id, latin, length, sex, maturity, age, wgt = indwgt, n = noatalk) 
+```
+
+### Save stuff for later use
+
+```{r, eval = FALSE}
+nsibts_tidy <- list(ST = ST, LE = LE, AG = AG)
+save(nsibts_tidy, file = "data/nsibts_tidy.rda")
+```
+
+
+```{r}
+load("data/nsibts_tidy.rda")
+ST <- nsibts_tidy$ST
+```
+
+## Data processing
+
+### Load needed data
+
+* Load the DATRAS raw data previously imported
+* Read in table containing latin name, code type (T or W) and the corresponding code:
+
+
+## CPUE by length class
+
+### By each tow
+
+```{r}
+cpue_per_length_per_haul <- function(st, le, source = "tidy") {
+  
+  if(source != "tidy") {
+    stop("Not implemented yet")
+  }
+
+  # tally up by sex
+  le <-
+    le %>%
+    group_by(id, latin, length) %>%
+    summarise(n = sum(n)) %>%
+    ungroup()
+  st.grid <- 
+    # Fill "a station table" for each species:
+    expand.grid(id = unique(st$id),
+                latin = unique(le$latin),
+                stringsAsFactors = FALSE) %>% 
+    tbl_df()
+  # stations with "missing species"
+  # "return all rows from st where there are not matching values in length,
+  #    keeping just columns from st."
+  st.zero <- 
+    anti_join(st.grid, le %>% select(id, latin) %>% distinct()) %>% 
+    # fill with remainder of variables
+    left_join(st) %>% 
+    # create a zero record
+    mutate(length = 0,
+           n = 0)
+  cpue <-
+    st %>%
+    left_join(le) %>% 
+    # add the zero stations
+    bind_rows(st.zero) %>% 
+    filter(!is.na(latin))
+  
+  return(cpue)
+}
+cpue2 <- cpue_per_length_per_haul(st = nsibts_tidy$ST, le = nsibts_tidy$LE)
+common <- c("Clupea harengus", "Sprattus sprattus", "Gadus morhua",
+            "Melanogrammus aeglefinus", "Merlangius merlangus", "Pollachius virens",
+            "Trisopterus esmarkii", "Scomber scombrus", "Pleuronectes platessa")
+cpue2 <- 
+  cpue2 %>% 
+  filter(latin %in% common)
+```
+
+
+Since we are here ignoring sex in the analysis, we tally up the data by length class. This also tallies up the subfactor data:
+
+```{r, message = FALSE, warning = FALSE}
+# tally up by sex
+le <-
+  nsibts_tidy$LE %>%
+  group_by(id, latin, length) %>%
+  summarise(n = sum(n)) %>%
+  ungroup()
+```
+
+Limit the species in the analysis to "common" species (this step is not really necessary):
+```{r, message = FALSE, warning = FALSE}
+common <- c("Clupea harengus", "Sprattus sprattus", "Gadus morhua",
+            "Melanogrammus aeglefinus", "Merlangius merlangus", "Pollachius virens",
+            "Trisopterus esmarkii", "Scomber scombrus", "Pleuronectes platessa")
+le <-
+  le %>%
+  # only common species
+  filter(latin %in% common)
+glimpse(le)
+```
+
+#### Merging the station table and the length table
+
+```{r, message = FALSE, warning = FALSE}
+st <- 
+  # Fill "a station table" for each species:
+  expand.grid(id = unique(ST$id),
+              latin = common,
+              stringsAsFactors = FALSE) %>% 
+  tbl_df()
+# stations with "missing species"
+# "return all rows from st where there are not matching values in length,
+#    keeping just columns from st."
+
+st.zero <- 
+  anti_join(st, le %>% select(id, latin) %>% distinct()) %>% 
+  # fill with remainder of variables
+  left_join(ST) %>% 
+  # create a zero record
+  mutate(length = 0,
+         n = 0)
+cpue <-
+  ST %>%
+  left_join(le) %>% 
+  # add the zero stations
+  bind_rows(st.zero) %>% 
+  filter(!is.na(latin))
+
+cpue <- cpue2
+```
+
+### Some simple summaries
+
+```{r, message = FALSE, warning = FALSE}
+cpue %>% 
+  group_by(id, latin) %>% 
+  summarise(n = sum(n)) %>%
+  separate(id, c("year", "quarter", "ship", "gear", "haulno"), convert = TRUE) %>%
+  filter(quarter %in% c(1, 3)) %>% 
+  mutate(year = year + quarter/4) %>% 
+  ggplot(aes(year, n, colour = factor(quarter))) +
+  stat_summary(fun.data = "mean_cl_boot", size = 0.1) +
+  expand_limits(y = 0) +
+  facet_wrap(~ latin, scale = "free_y") +
+  scale_color_brewer(palette = "Set1") +
+  labs(x = NULL, y = NULL,
+       colour = "Quarter",
+       title = "Annual abundance",
+       subtitle = "Bootstrap mean and confidence interval of individual tows") +
+  scale_x_continuous(breaks = seq(2000, 2020, 5))
+```
+
+
+```{r, message = FALSE, warning = FALSE}
+d <-
+  cpue %>%
+  group_by(year, quarter, latin, length) %>% 
+  summarise(n = sum(n)/1e3) %>% 
+  mutate(length = length/10) %>% 
+  ungroup()
+d %>%
+    filter(latin == "Melanogrammus aeglefinus",
+         quarter == 1) %>% 
+  ggplot(aes(length,  as.factor(year), group = year, height = n)) +
+  geom_joy(stat = "identity")
+d %>%
+    filter(latin == "Gadus morhua",
+         quarter == 1) %>% 
+  ggplot(aes(length,  as.factor(year), height = n)) +
+  geom_joy(stat = "identity")
+d %>%
+    filter(latin == "Pleuronectes platessa",
+         quarter == 1) %>% 
+  ggplot(aes(length, as.factor(year), height = n)) +
+  geom_joy(stat = "identity", alpha = 0.5)
+```
+
+__Mean by subarea__:
+```{r, message = FALSE, warning = FALSE}
+le_cm <-
+  le %>% 
+  mutate(length = length/10)
+gr <- 
+  expand.grid(id = ST$id,
+              length = 0:200,
+              stringsAsFactors = FALSE)
+d <- 
+  gr %>% 
+  left_join(ST %>% select(id, area, subarea)) %>% 
+  left_join(le_cm %>% filter(latin == "Gadus morhua")) %>% 
+  mutate(n = ifelse(is.na(n), 0, n)) %>% 
+  select(-latin) %>% 
+  separate(id, c("year", "quarter", "ship", "gear", "haulno"), convert = TRUE) %>% 
+  group_by(year, quarter, area, subarea, length) %>% 
+  summarise(n = mean(n)) %>% 
+  ungroup()
+```
+
+```{r, eval = FALSE, echo = FALSE}
+# a comparions with datras product
+d2 <- read_csv("data-raw/CPUE_per_length_per_subarea.csv")
+colnames(d2) <- tolower(colnames(d2))
+d2 <-
+  d2 %>% 
+  filter(species == "Gadus morhua") %>% 
+  select(year, quarter, subarea, length = lngtclass, n.datras = cpue_number_per_hour) %>% 
+  mutate(length = length/10)
+d3 <-
+  d %>% 
+  left_join(d2) %>% 
+  mutate(n.datras = ifelse(is.na(n.datras), 0, n.datras))
+d3 %>% 
+  mutate(n = round(n, 3)) %>% 
+  filter(n != n.datras) %>% 
+  ggplot(aes(n, n.datras)) +
+  geom_point()
+d3 %>% 
+  mutate(n = round(n, 3)) %>% 
+  filter(n != n.datras) %>% 
+  ggplot(aes(n - n.datras)) +
+  geom_histogram()
+```
+
+__Mean by area__:
+
+```{r, message = FALSE, warning = FALSE}
+#d.stored <- d
+d <- 
+  d %>% 
+  group_by(year, quarter, area, length) %>% 
+  summarise(n = mean(n)) %>% 
+  ungroup()
+```
+
+```{r, message = FALSE, warning = FALSE}
+d %>% 
+  filter(year == 2017,
+         quarter == 1, 
+         length <= 110) %>% 
+  mutate(area = as.integer(area)) %>% 
+  ggplot(aes(length, n, colour = factor(area))) +
+  geom_line(lwd=1) +
+  scale_colour_brewer(palette = "Set3")
+```
+
+```{r, message = FALSE, warning = FALSE}
+d %>% 
+  group_by(year, quarter, area) %>% 
+  summarise(n = sum(n)) %>%
+  ungroup() %>% 
+  filter(quarter %in% c(1, 3)) %>% 
+  mutate(area = as.integer(area),
+         year = year + quarter/4) %>% 
+  ggplot(aes(year, n, colour = factor(quarter))) +
+  geom_point() +
+  geom_line() +
+  expand_limits(y = 0) +
+  facet_wrap(~ area, scale = "free_y") +
+  scale_color_brewer(palette = "Set1") +
+  labs(x = NULL, y = NULL,
+       colour = "Quarter",
+       title = "Annual mean abundance",
+       subtitle = "Mean based on cpue by area") +
+  scale_x_continuous(breaks = seq(2005,2015,5))
+
+
+d %>% 
+  group_by(year, quarter, area) %>% 
+  # sum all length data
+  summarise(n = sum(n)) %>%
+  ungroup() %>% 
+  filter(quarter %in% c(1, 3)) %>% 
+  mutate(year = year + quarter/4) %>% 
+  ggplot(aes(year, n, colour = factor(quarter))) +
+  stat_summary(fun.data = "mean_cl_boot", size = 0.1) +
+  expand_limits(y = 0) +
+  scale_color_brewer(palette = "Set1") +
+  labs(x = NULL, y = NULL,
+       colour = "Quarter",
+       title = "Annual abundance",
+       subtitle = "Bootstrap mean and confidence interval of data by area") +
+  scale_x_continuous(breaks = seq(2005,2015,5))
+```
+
+```{r echo = FALSE, eval = FALSE}
+# comparison with datras product
+d2 <- read_csv("data-raw/CPUE_per_length_area.csv")
+colnames(d2) <- tolower(colnames(d2))
+d2 <-
+  d2 %>% 
+  filter(species == "Gadus morhua") %>% 
+  select(year, quarter, area, length = lngtclass, n.datras = cpue_number_per_hour) %>% 
+  mutate(length = length/10)
+d3 <-
+  d %>% 
+  left_join(d3) %>% 
+  mutate(n.datras = ifelse(is.na(n.datras), 0, n.datras))
+d3 %>% 
+  mutate(n = round(n, 3)) %>% 
+  filter(n != n.datras) %>% 
+  ggplot(aes(n, n.datras)) +
+  geom_point()
+d3 %>% 
+  mutate(n = round(n, 3)) %>% 
+  filter(n != n.datras) %>% 
+  ggplot(aes(n - n.datras)) +
+  geom_histogram()
+```
+
+
+## Field names
+
+* **StNo**: National coding system, not defined by ICES
+* **HaulNo**: Sequential numbering of hauls during cruise. In CA-records: HaulNo = -9 for Area-based ALK HaulNo <> -9 and > 0 for Haul-based ALK
+* **DataType**:
+    - -9: Invalid haul
+    - C: Data calculated as CPUE (number per hour)
+    - R: Data by haul
+    - S: Subsample data
+* **SpecCodeType**:
+    - N: NODC code
+    - T: TSN code
+    - W: WoRMS ApiaID code
+* **LngtCode**:
+    - .:	1 mm length class, reporting units: mm
+    - 0:	0.5 cm length class, reporting units: mm
+    - 1:	1 cm length class, reporting units: cm
+* **CatIdentifier**: Category for subsampling for species, length, weight, and sex. If **DataType** is C, **CatIdentifier** is always 1. For further description and examples of use look up the manual.
+* **SubFactor**: Sub-sampling factor. If 1/6 of the catch was measured, report 6. If **DataType** is:
+    - C: it should be reported as 1. 
+    - S: it is always >1.
+    - R: the SubFactor is = 1 or >1 for different species depending on whether they were subsampled.
+
+
