@@ -1,0 +1,181 @@
+---
+title: "Importing and tidying"
+output: 
+  html_document:
+    fig_height: 4
+    fig_width: 8
+    highlight: haddock
+    theme: united
+    toc: yes
+    toc_float: yes
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
+```
+
+
+```{r}
+library(tidyverse)
+```
+
+# Preamble
+___
+
+... say something on the DATRAS data (use links) and something about the objectives of this exercise (what will you learn).
+
+... make sure to emphasise that this is a case example and the intent is not dig deeply into caluclation of survey indices.
+
+
+# Importing
+___
+
+One can obtain DATRAS data using the `getDATRAS` function from the [icesDatras](https://github.com/ices-tools-prod/icesDatras)-package. Here will limit what will be retrieved to the North Sea International Bottom Trawl Survev (NS-IBTS), for years 1975 to 2017 and quarter 1:
+
+```{r, eval = FALSE}
+# not run
+raw_st <- icesDatras::getDATRAS(record = "HH",
+                            survey = "NS-IBTS",
+                            years = 1975:2017,
+                            quarters = 1)
+raw_le <- icesDatras::getDATRAS(record = "HL",
+                            survey = "NS-IBTS",
+                            years = 1975:2017,
+                            quarters = 1)
+raw_ag <- icesDatras::getDATRAS(record = "CA",
+                            survey = "NS-IBTS",
+                            years = 1975:2017,
+                            quarters = 1)
+```
+
+Because this takes some ten's of minutes to retrieve one would not do this everytime one is starting an R-session. Hence, normally one would do retrival steps ("downloading") **once** and save the data for more quicker retrieval "next time around". Have two options to store retrieved data:
+
+* Export the data as a text file (this way, we could access the data via any software and platform)
+* Save the data as a R-binary file
+
+The latter is used in the following step, using the function `save` (read the manual for that function, using ?save):
+
+```{r, eval = FALSE}
+save(raw_st, raw_le, raw_ag, file = "data/nsibts_raw.rda")
+```
+
+If one then were to start a session at a **later** time the easiest (and least confusing for beginners) is to use the function `load` to get the data into the global environment: 
+```{r}
+load("data/nsibts_raw.rda")
+```
+
+To get an overview of what is in store lets call the `glimpse`-function:
+
+```{r}
+glimpse(raw_st)
+glimpse(raw_le)
+glimpse(raw_ag)
+```
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+# Tidying
+___
+
+The number of variables in each of the dataframes may look overwhelming. Fortunately a lot of the variables are redundant given our objectives. The data frame that contains length also does not fall strictly under the umbrella of being tidy. Here we tidy the data a bit, making later processing a little bit easier.
+
+### The station data
+
+<!-- Need to explain the area stuff -->
+
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+ns_area <- rgdal::readOGR("/home/haf/einarhj/prj2/bookdown/datrasdoodle/data-raw/NS_IBTS_RF.dbf", verbose = FALSE)
+# Turn column names lower case
+colnames(raw_st) <- tolower(colnames(raw_st))
+st <- 
+  raw_st %>% 
+  # create a unique station id
+  unite(id, year, quarter, ship, gear, haulno, remove = FALSE) %>%
+  # get proper date
+  mutate(timeshot = stringr::str_pad(timeshot, width = 4, side = "left", pad = "0"),
+         timeshot = paste0(stringr::str_sub(timeshot, 1, 2),
+                           ":",
+                           stringr::str_sub(timeshot, 3, 4)),
+         datetime = lubridate::ymd_hm(paste(year, month, day, timeshot))) %>% 
+  # Get roundfish area
+  mutate(area = gisland::geo_inside(shootlong, shootlat, ns_area, "AreaName")) %>% 
+  # only valid hauls
+  filter(haulval == "V",
+         # only in roundfish area
+         !is.na(area)) %>% 
+  # select only "needed" column
+  select(id, survey, year, quarter, ship, gear, haulno, country, hauldur,
+         shootlat, shootlong, date = datetime, depth, 
+         area, subarea = statrec, daynight, datatype) %>% 
+  tbl_df()
+```
+
+### The length data
+
+Processing:
+
+* Only distinct records (they are all distinct)
+* Filter out data were species code, length-code and length-class are undefined
+* Set lengths to millimeter. In the raw records:
+    - If **lngtcode** is "1" then the **lngtclass** is in centimeters
+    - If **lngtcode** is "." or "0" then the **lngclass** is in millimeters
+* Standardise the **haul numbers at length**. In the raw data:
+    - If **datatype** in the station table is "C" then **hlnoatlngt** has been standardized to 60 minutes haul
+    - If **datatype** in the station table is "R" then **hlnoatlngt** has not been standardized to 60 minutes haul
+* Get the latin species name from the `sp`-table
+* Select only variable that are needed in further processing
+    
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+# read in species code
+sp <- read_csv("/home/haf/einarhj/prj2/bookdown/datrasdoodle/data-raw/SPCODE.csv")
+colnames(raw_le) <- tolower(colnames(raw_le))
+le <-
+  raw_le %>%
+  distinct() %>%
+  filter(!is.na(speccode), !is.na(lngtclass), !is.na(lngtcode)) %>%
+  # EINAR - not sure if this is right, done here to test if any difference
+  #         (did though not help with respect to discrepancy here below)
+  #filter(specval == 1) %>% 
+  unite(id, year, quarter, ship, gear, haulno) %>%
+  # only stations that are in the station table (north sea ibts)
+  #  may be reduntant
+  filter(id %in% st$id) %>% 
+  # length class to cm
+  mutate(length = ifelse(lngtcode %in% c("1"), lngtclass, lngtclass / 10),
+         hlnoatlngt = hlnoatlngt * subfactor) %>% 
+  # get the data type and hauldur
+  left_join(st %>% select(id, datatype, hauldur)) %>% 
+  # catch per hour
+  mutate(n = ifelse(datatype == "R",
+                    hlnoatlngt * 60 / hauldur,
+                    hlnoatlngt)) %>% 
+  # join with latin name
+  left_join(sp) %>%
+  # select only needed columns
+  select(id, latin, sex, length, n) %>% 
+  tbl_df()
+```
+
+### The age data
+
+```{r, eval = FALSE}
+colnames(raw_ag) <- tolower(colnames(raw_ag))
+ag <- 
+  raw_ag %>% 
+  unite(id, year, quarter, ship, gear, haulno) %>% 
+  # turn everything to cm
+  mutate(length = ifelse(!lngtcode %in% c("1"), lngtclass / 10, lngtclass), 
+         indwgt = ifelse(indwgt <= 0, NA, indwgt)) %>% 
+  left_join(sp) %>% 
+  select(id, latin, length, sex, maturity, age, wgt = indwgt, n = noatalk) 
+```
+
+### Save stuff for later use
+
+```{r, eval = FALSE}
+save(st, le, ag, file = "data/nsibts_tidy.rda")
+```
+

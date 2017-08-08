@@ -47,18 +47,50 @@ We taught this course first time in ICES last year. Last years course [site](htt
 ### Presentation
 ___
 
-### Ad-hoc stuff
+#### ...
+
+#### [Getting started with ggplot](pre_ggplot.html)
+
+#### ...
+
+#### [Applied grammar and then some](pre_grammar2.html)
+
+#### ...
+
+### Bits and pieces
 ___
+
+#### [Accessing fishbase data](b_fishbase.html)
+
+#### [Generating a package](b_packages.html)
+
+#### [Working with dates](b_dates.html)
+
+* **TODO**: Revamp, add examples of difference in dates
+
+#### ...
 
 ### Potential projects
 ___
 
+#### [Good environmental status](prj_ges.html)
+
+#### [Logbook data](prj_log.html)
+
+* **TODO**: Revamp or drop
+
+#### [Viewing stock summary statistics](prj_ss.html)
+
+#### ...
+
+### Ad-hoc stuff
+___
+
+#### ...
+
 ### Background on some data used
 ___
 
-
-### Post-hoc stuff
-___
-
+#### ...
 
 **The source for this space is found [here](https://github.com/fishvice/tcrenv2017).**

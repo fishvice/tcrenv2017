@@ -1,0 +1,40 @@
+---
+title: "Generating a package"
+subtitle: "Minimum example"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 4
+    highlight: haddock
+    theme: united
+    toc: no
+    toc_float: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+Your best source when it comes to learning the ins and outs of package generation is the book [R packages](https://github.com/fishvice/tcrenv2016.git).
+
+Basically within R-studio the minimum needed is the following:
+
+1. File > New Project > New Directory > R Package > type in package name.
+2. Install the package `roxygen2` if you have not already done so.
+3. Suggest you then do: Tools > Project Options ... and
+<div style="width:300px; height=300px">
+![options](http://r-pkgs.had.co.nz/screenshots/build-reload-opts-2.png)
+</div>
+4. Put some functions (scripts) you have created into the R-directory
+5. Open the .R documents, click anywhere inside the function code and do: Code > Insert Roxygen Skeleton
+6. Do: Build > Build and Reload
+
+If the steps above go smoothly you should by the end of last command see that your library has been loaded into your current session.
+
+Then when you want to use the functions in this package in any other r-project you simply to the usual:
+```
+library(mypackage)
+```
+
+

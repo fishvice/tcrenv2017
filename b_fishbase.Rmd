@@ -1,0 +1,108 @@
+---
+title: "Accessing fishbase data"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 4
+    highlight: haddock
+    theme: united
+    toc: no
+    toc_float: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+The **rfishbase**-package provides an interface to the [fishbase.org](http://fishbase.org) database. In this snipped we focus only on extracting the parameters of length-coefficient and von Bertanlanffy growth curve.
+
+```{r}
+library(tidyverse)
+library(rfishbase)
+```
+
+Lets just take one species as an example:
+```{r}
+latin <- c("Gadus morhua")
+```
+
+We can extract the length-weight parameters with the `length_weight`-function:
+```{r}
+lwcoeff <- length_weight(latin)
+glimpse(lwcoeff)
+```
+
+We have 37 varibles and 18 observation (this varies between species). The variables we are intersted in are **a** and **b**.
+
+```{r, echo = FALSE}
+df <-
+  lwcoeff %>% 
+  select(sciname, a, b) %>% 
+  drop_na() %>% 
+  mutate(id = 1:n())
+
+expand.grid(length = 0:110,
+            id = df$id) %>% 
+  as_tibble() %>% 
+  left_join(df) %>% 
+  mutate(weight = a * length^b / 1e3) %>% 
+  ggplot(aes(length, weight, group = id)) +
+  geom_line()
+```
+
+Without looking into the details we could just decide to use the median values for the species:
+
+```{r}
+lwcoeff <-
+  lwcoeff %>% 
+  drop_na() %>% 
+  group_by(sciname) %>% 
+  summarise(n.lw = n(),
+            a = median(a),
+            b = median(b))
+lwcoeff
+```
+
+We similarily can extract the von Bertanlanffy parameters using the `popgrowth`-function:
+```{r}
+vbl <- popgrowth(latin)
+glimpse(vbl)
+```
+
+```{r, echo = FALSE}
+df <-
+  vbl %>% 
+  select(sciname, Loo, K, to) %>% 
+  drop_na() %>% 
+  mutate(id = 1:n())
+
+expand.grid(age = 0:20,
+            id = df$id) %>% 
+  as_tibble() %>% 
+  left_join(df) %>% 
+  mutate(length = Loo * (1 - exp(-(K * (age - to))))) %>% 
+  ggplot(aes(age, length, group = id)) +
+  geom_line()
+```
+
+```{r}
+vbl <-
+  vbl %>%
+  select(sciname, Loo, K, to) %>% 
+  drop_na() %>% 
+  group_by(sciname) %>% 
+  summarise(n.vbl = n(),
+            Loo = median(Loo),
+            K   = median(K),
+            to  = median(to))
+vbl
+```
+
+We can easily join the tables:
+```{r}
+lwcoeff %>% 
+  left_join(vbl)
+```
+
+
