@@ -1,0 +1,99 @@
+---
+title: "Working with strings"
+author: "Bjarki Þór Elvarsson"
+date: "August 8, 2017"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 4
+    highlight: haddock
+    theme: united
+    toc: no
+    toc_float: no
+---
+## String processing (optional)
+The `stringr` package allows for more flexible processing of variables
+
+```{r,eval=FALSE}
+str_c()        ## paste two strings together
+sprintf()      ## wildcard replacement
+str_view()     ## illustrate the pattern match
+str_locate()   ## find a certain pattern
+str_replace()  ## find certain pattern and replace
+str_extract()  ## extract first value matching patter
+str_sub()      ## limit a string by position
+str_split()    ## split a string according to a split symbol
+str_length()   ## length of a string
+str_trim()     ## trim unwanted white-space
+as.numeric()   ## cast a string to number (if possible)
+as.character() ## create a string 
+```
+
+When working with strings it is often useful to know regular expressions:
+
+```{r,eval=FALSE}
+[0-9]  ## matches any digit.
+\s     ##  matches any whitespace (e.g. space, tab, newline).
+[abc]  ## matches a, b, or c.
+[^abc] ## matches anything except a, b, or c.
+[a-z]  ## matches any lowercase letter
+[A-Z]  ## matches any uppercase letter
+.      ## matches any character
+?      ## matches 0 or 1 times
++      ## 1 or more
+*      ## 0 or more
+^      ## beginning of a string
+$      ## end of a string
+```
+
+Examples:
+```{r,eval=FALSE}
+a <- 'Abba'
+b <- 'babb'
+zzz <- "The book is on the second shelf, costs 199.99 kr" 
+
+str_c(a,b)
+str_c(a,b,sep=' ')
+
+sprintf('ABBA %s %s BABB',a,b)
+sprintf('%2$s %1$s %1$s',a,b)
+
+# first lower case letter
+str_view_all(zzz, '[a-z]')
+# first letter
+str_view(zzz, '[A-Za-z]')
+# first word
+str_view(zzz, '[A-Za-z]+')
+str_view_all(zzz, '[abc]+')
+# all words
+str_view_all(zzz, '[A-Za-z]+')
+# everything
+str_view(zzz, '.+')
+str_view(zzz, '.')
+
+# first whitespace
+str_view(zzz, '\\s')
+# number
+str_view(zzz, '[0-9]')
+str_view(zzz, '[0-9]+')
+str_view(zzz, '[0-9]+\\.[0-9]+')
+
+str_view('246','[246]')
+str_view('246','246')
+
+
+# last word
+str_view(zzz, '[a-z]+$')
+str_view(zzz, '[a-z]+')
+
+
+## extract the first word
+str_extract(zzz,'[A-Za-z]+')
+
+## replace the first word
+str_replace(zzz,'[A-Za-z]+','A')
+```
+
+## Further reading
+
+* https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html
