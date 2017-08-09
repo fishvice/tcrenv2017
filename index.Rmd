@@ -57,6 +57,8 @@ ___
 
 #### ...
 
+#### [Working with dates](pre_dates.html)
+
 ### Bits and pieces
 ___
 
