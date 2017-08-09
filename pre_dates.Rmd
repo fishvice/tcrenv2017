@@ -1,0 +1,249 @@
+---
+title: "Working with dates"
+output: 
+  html_document:
+    fig_height: 4
+    fig_width: 8
+    highlight: haddock
+    theme: united
+    toc: yes
+    toc_float: yes
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
+```
+
+```{r}
+library(lubridate)
+library(tidyverse)
+library(cowplot)
+theme_set(theme_bw())
+```
+
+
+# Preamble
+___
+
+Working with dates and time is always tricky, no matter the programming language. fortunately a package called `lubridate` comes to our rescue when working in R.
+
+As stated in [r4ds](http://r4ds.had.co.nz/dates-and-times.html):
+
+"There are three types of date/time data that refer to an instant in time:
+
+* A **date**. Tibbles print this as <date>
+* A **time** within a day. Tibbles print this as <time>.
+* A **date-time** is a date plus a time: it uniquely identifies an instant in time (typically to the nearest second). Tibbles print this as <dttm>. Elsewhere in R these are called POSIXct, but I don’t think that’s a very useful name."
+
+```{r, eval = FALSE}
+today()    # date
+now  ()    # datetime
+# generating dates from strings - different format, same date
+ymd("2017-08-23")
+ymd("20170823")
+ymd("20132308")   # returns NA
+dmy("23-8-2017")
+mdy("8/23/2017")
+make_date(2017, 8, 23)
+# date-time
+ymd_hm("2017/08/23 08:01")
+ymd_hms("2017/08/23 08:01:59")
+ymd_hms("20170823 080159")
+make_datetime(2017, 8, 23, 8, 1, 59)
+```
+
+# Creating date and datetime
+
+In our example case, the "exchange format" of the DATRAS haul data we have date and time components stored as separate variables. Lets extract some data and start by selecting part of the variables, mostly those that deal with date/time:
+```{r}
+df <- 
+  icesDatras::getDATRAS("HH", survey = "NS-IBTS", years = 2014, quarters = 1) %>% 
+  as_tibble() %>% 
+  unite(id, country = Country, Year, Quarter, Ship, Gear, HaulNo, remove = FALSE) %>% 
+  select(id, Year:TimeShot, Quarter, HaulDur, DayNight, Country)
+colnames(df) <- tolower(colnames(df))
+df %>% glimpse()
+```
+
+Here we have the components that make up **date** as three separate variables which we can turn into dates either by generating a string and then use the `ymd`- or the `make_date`-function:
+```{r}
+df %>% 
+  mutate(date1 = ymd(paste(year, month, day)),
+         date2 = make_date(year, month, day)) %>% 
+  glimpse()
+```
+
+Creating a **datetime** is a little trickier because the hour and minutes are stored in a variable timeshot that is of type integer, where the leading "0" in the hour is sometimes missing. Here we need to convert the timeshot to a character. We can then create "a proper" string for hour and minutes or split the variable into hour and minute and then use the `make_datetime`-function:
+
+```{r}
+df <-
+  df %>% 
+         # add a leading zero if needed
+  mutate(timeshot = stringr::str_pad(timeshot, width = 4, side = "left", pad = "0"),
+         # add ":" as separator between hour:minute
+         timeshot = paste0(stringr::str_sub(timeshot, 1, 2),
+                           ":",
+                           stringr::str_sub(timeshot, 3, 4))) %>% 
+  # split hh:mm into hour and minute, convert the value to integer but keep the old variable
+  separate(timeshot, c("hour", "minute"), convert = TRUE, remove = FALSE) %>%
+  mutate(datetime1 = ymd_hm(paste(year, month, day, timeshot)),
+         datetime2 = make_datetime(year, month, day, hour, minute))
+df %>%  glimpse()
+```
+
+We now have a lot of redundant columns so we could keep only the essential (for demonstration purpose):
+
+```{r}
+df <-
+  df %>% 
+  select(id, timeshoot = datetime1, hauldur, daynight, quarter, country)
+```
+
+# Datetime components
+
+Once we have our date-time variable correctly setup we can start making something (possibly) useful with it. Consider:
+
+```{r, eval = FALSE}
+dt <- now()
+dt
+as_date(dt)  # this function was used above
+year(dt)
+quarter(dt)
+month(dt)
+week(dt)
+day(dt)
+pm(dt)
+am(dt)
+hour(dt)
+minute(dt)
+second(dt)
+```
+
+The functions above basically pull apart various elements of **date** or **datetime**.
+
+If we turn our focus back to the DATRAS haul data we can e.g. easily extract and then visualize the number per day:
+```{r}
+df %>% 
+  mutate(date = as_date(timeshoot)) %>%  # convert timedate to date
+  ggplot(aes(date)) +
+  geom_freqpoly(binwidth = 1)            # the bin here is 1 day
+```
+
+Or the number of hauls taken by weekday (both graphs here show the same result, the one on the right though is often preferred because it "contains less ink"):
+```{r fig.show = "hold"}
+p1 <-
+  df %>% 
+  mutate(wday = wday(timeshoot, label = TRUE, abbr = FALSE)) %>% 
+  ggplot(aes(wday)) +
+  geom_bar() +
+  labs(x = NULL, y = "Number of hauls") +
+  coord_flip()
+p2 <- 
+  df %>% 
+  mutate(wday = wday(timeshoot, label = TRUE, abbr = FALSE)) %>% 
+  group_by(wday) %>% 
+  count() %>% 
+  ggplot(aes(wday, n)) +
+  geom_pointrange(aes(ymin = 0, ymax = n), size = 1) +
+  labs(x = NULL, y = "Number of hauls") +
+  coord_flip()
+plot_grid(p1, p2)
+```
+
+We observe that most hauls are taken in the beginning of the workweek and the numbers declines somewhat with time as the week progresses. The other striking feature is that fewest number of hauls are taken over the weekend, the survey scientists being particularly qualm on Saturdays :-)
+
+#### Exercise
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+1. Create a code that tally's up the number by weekday and country. Create a visualization of the data using a line and point layer.
+
+```{r, echo = FALSE, eval = FALSE}
+df %>% 
+  mutate(wday = wday(timeshoot)) %>% 
+  group_by(country, wday) %>% 
+  count() %>% 
+  ggplot(aes(wday, n, colour = country)) +
+  geom_point(size = 3) +
+  geom_line(lwd = 1) +
+  scale_color_brewer(palette = "Set1")
+```
+
+2. Create a code that tally's up the number of hauls by hour of the day
+
+```{r, echo = FALSE, eval = FALSE}
+df %>% 
+  mutate(hour = hour(timeshoot)) %>% 
+  group_by(hour) %>% 
+  count()
+```
+
+3. Create a code that tally's the number of hauls by wday and hour. Try to create the following visualization:
+
+```{r, echo = FALSE}
+df %>% 
+  mutate(wday = wday(timeshoot, label = TRUE), hour = hour(timeshoot)) %>% 
+  group_by(wday, hour) %>% 
+  count() %>% 
+  ggplot(aes(wday, hour, size = n, label = n)) +
+  geom_point(colour = "red", alpha = 0.5) +
+  scale_size_area(max_size = 30) +
+  geom_text(aes(label = n), colour = "blue", angle = 45, size = 5) +
+  scale_y_continuous(breaks = seq(6, 18, by = 2)) +
+  labs(x = NULL) +
+  theme(legend.position = "none")
+```
+
+4. Bonus: Modify the above, such that country is represented by a facet.
+
+```{r, echo = FALSE, eval = FALSE}
+df %>% 
+  mutate(wday = wday(timeshoot, label = TRUE), hour = hour(timeshoot)) %>% 
+  group_by(country, wday, hour) %>% 
+  count() %>% 
+  ggplot(aes(wday, hour, size = n, label = n)) +
+  geom_point(colour = "red", alpha = 0.5) +
+  scale_size_area(max_size = 15) +
+  geom_text(aes(label = n), colour = "blue", angle = 45, size = 5) +
+  scale_y_continuous(breaks = seq(6, 18, by = 2)) +
+  theme(legend.position = "none") +
+  facet_wrap(~ country)
+```
+
+</div>
+</div>
+
+# Arithmetics with dates
+
+In the DATRAS haul data we have a variable hauldur that represents the haul duration in minutes. Given that we have the starting time of the haul (variable timeshoot) we should be able to calculate the end time of the haul (timehaul). Consider:
+
+```{r}
+timeshoot <- ymd_hm("2014-02-16 16:45")
+hauldur <- 30
+```
+
+One may think that it would be possible to calculate the haul time simply adding the haul duration to the time shot: 
+```{r}
+timeshoot + hauldur
+```
+
+This however only adds 30 seconds to the shoot time. This is because when it comes to date-time, the duration must be represented in seconds. Hence we would need to convert minutes to seconds before we do any arithmetic with time:
+
+```{r}
+timehaul <- timeshoot + hauldur * 60
+# or
+timeshoot + dminutes(30)
+```
+
+We could hence calculate the haul time for the DATRAS hauls via:
+
+```{r}
+df %>% 
+  mutate(timehaul = timeshoot + dminutes(hauldur)) %>% 
+  glimpse()
+```
+
+Further information on arithmetic with dates are found in section 16.4 in [r2ds](http://r4ds.had.co.nz/dates-and-times.html#time-spans).
