@@ -36,20 +36,131 @@ One can obtain DATRAS data using the `getDATRAS` function from the [icesDatras](
 ```{r, eval = FALSE}
 # not run
 raw_st <- icesDatras::getDATRAS(record = "HH",
-                            survey = "NS-IBTS",
-                            years = 1975:2017,
-                            quarters = 1)
+                                survey = "NS-IBTS",
+                                years = 1975:2017,
+                                quarters = 1)
 raw_le <- icesDatras::getDATRAS(record = "HL",
-                            survey = "NS-IBTS",
-                            years = 1975:2017,
-                            quarters = 1)
+                                survey = "NS-IBTS",
+                                years = 1975:2017,
+                                quarters = 1)
 raw_ag <- icesDatras::getDATRAS(record = "CA",
-                            survey = "NS-IBTS",
-                            years = 1975:2017,
-                            quarters = 1)
+                                survey = "NS-IBTS",
+                                years = 1975:2017,
+                                quarters = 1)
 ```
 
-Because this takes some ten's of minutes to retrieve one would not do this everytime one is starting an R-session. Hence, normally one would do retrival steps ("downloading") **once** and save the data for more quicker retrieval "next time around". Have two options to store retrieved data:
+Because this takes some ten's of minutes to retrieve one would not do this everytime one is starting an R-session. Hence, normally one would do retrival steps ("downloading") **once** and save the data for more quicker retrieval "next time around".
+
+In addition to the above we need some additional information.
+
+Firstly we need to obtain the species:
+```{r, eval = FALSE}
+species <- 
+  raw_le %>% 
+  select(speccodetype = SpecCodeType, speccode = SpecCode) %>% 
+  distinct() %>% 
+  mutate(speccode = as.integer(speccode)) %>% 
+  filter(!is.na(speccode))
+tsn <- 
+  species %>% 
+  filter(speccodetype == "T")
+out.tsn <- list()
+for(i in 1:nrow(tsn)) {
+  out.tsn[[i]] <- paste0("https://datras.ices.dk/WebServices/DATRASWebService.asmx/getSpecies?codename=tsn&code=",
+                tsn$speccode[i]) %>% 
+    icesDatras:::readDatras() %>% 
+    icesDatras:::parseDatras()
+}
+
+aphia <- 
+  species %>% 
+  filter(speccodetype == "W")
+
+out.aphia <- list()
+for(i in 1:nrow(aphia)) {
+  out.aphia[[i]] <- 
+    paste0("https://datras.ices.dk/WebServices/DATRASWebService.asmx/getSpecies?codename=aphia&code=",
+                aphia$speccode[i]) %>% 
+    icesDatras:::readDatras() %>% 
+    icesDatras:::parseDatras()
+}
+
+species2 <-
+  bind_rows(out.tsn) %>% 
+  bind_rows(bind_rows(out.aphia)) %>% 
+  as_tibble() %>% 
+  select(aphia, tsn, latin = latinname) %>% 
+  distinct() %>% 
+  gather(speccodetype, speccode, aphia:tsn) %>% 
+  mutate(speccodetype = ifelse(speccodetype == "aphia", "W", "T")) %>% 
+  filter(speccode > 0,
+         !is.na(speccode)) %>% 
+  mutate(latin = ifelse(latin == "Torpedo (Torpedo) marmorata", "Torpedo marmorata", latin)) %>% 
+  distinct()
+
+raw_le.tmp <- raw_le
+colnames(raw_le.tmp) <- tolower(colnames(raw_le.tmp))
+raw_le.tmp <-
+  raw_le.tmp %>% 
+  left_join(species2)
+nrow(raw_le) - nrow(raw_le.tmp)
+
+
+valid_aphia <- 
+  raw_le.tmp %>% 
+  filter(is.na(latin)) %>% 
+  select(valid_aphia) %>% 
+  mutate(valid_aphia = as.integer(valid_aphia),
+         speccodetype = "W") %>% 
+  distinct() %>% 
+  drop_na()
+
+out.aphia2 <- list()
+for(i in 1:nrow(valid_aphia)) {
+  out.aphia2[[i]] <- 
+    paste0("https://datras.ices.dk/WebServices/DATRASWebService.asmx/getSpecies?codename=aphia&code=",
+                valid_aphia$valid_aphia[i]) %>% 
+    icesDatras:::readDatras() %>% 
+    icesDatras:::parseDatras()
+}
+
+species3 <-
+  out.aphia2 %>% 
+  bind_rows() %>% 
+  as_tibble() %>% 
+  select(valid_aphia = aphia, latin = latinname) %>%
+  distinct()
+
+x.defined   <- raw_le.tmp %>% filter(!is.na(latin))
+x.undefined <- raw_le.tmp %>% filter( is.na(latin)) %>% 
+  select(-latin) %>% 
+  left_join(species3)
+x <- 
+  bind_rows(x.defined, x.undefined)
+x  %>% filter(is.na(latin)) %>% 
+  group_by(year) %>% 
+  count() %>% as.data.frame()
+x %>% filter(is.na(latin)) %>% select(speccodetype, speccode, valid_aphia) %>% as_tibble() %>% drop_na() %>% distinct()
+species_code <- 
+  x %>% 
+  select(SpecCodeType = speccodetype, SpecCode = speccode, Valid_Aphia = valid_aphia, latin) %>% 
+  filter(!is.na(latin)) %>% 
+  distinct()
+```
+
+
+Secondly we want to get the NSIBT area, split as well into "Roundfish" subareas
+```{r, eval = FALSE}
+tmp <- tempfile()
+download.file("http://gis.ices.dk/Shapefiles/6951716_output.zip",
+              destfile = tmp)
+tmpdir <- tempdir()
+unzip(tmp, exdir = tmpdir)
+ns_area <- rgdal::readOGR(paste0(tmpdir, "/Shapefile.dbf"), verbose = FALSE)
+```
+
+
+Have two options to store retrieved data:
 
 * Export the data as a text file (this way, we could access the data via any software and platform)
 * Save the data as a R-binary file
@@ -57,7 +168,7 @@ Because this takes some ten's of minutes to retrieve one would not do this every
 The latter is used in the following step, using the function `save` (read the manual for that function, using ?save):
 
 ```{r, eval = FALSE}
-save(raw_st, raw_le, raw_ag, file = "data/nsibts_raw.rda")
+save(raw_st, raw_le, raw_ag, species_code, ns_area, file = "data/nsibts_raw.rda")
 ```
 
 If one then were to start a session at a **later** time the easiest (and least confusing for beginners) is to use the function `load` to get the data into the global environment: 
@@ -71,6 +182,7 @@ To get an overview of what is in store lets call the `glimpse`-function:
 glimpse(raw_st)
 glimpse(raw_le)
 glimpse(raw_ag)
+glimpse(species_code)
 ```
 
 ```{r}
@@ -84,15 +196,8 @@ The number of variables in each of the dataframes may look overwhelming. Fortuna
 
 ### The station data
 
-<!-- Need to explain the area stuff -->
 
 ```{r, message = FALSE, warning = FALSE, eval = FALSE}
-tmp <- tempfile()
-download.file("http://www.hafro.is/~einarhj/data/NS_IBTS_RF.zip",
-              destfile = tmp)
-tmpdir <- tempdir()
-unzip(tmp, exdir = tmpdir)
-ns_area <- rgdal::readOGR(paste0(tmpdir, "/NS_IBTS_RF.dbf"), verbose = FALSE)
 # Turn column names lower case
 colnames(raw_st) <- tolower(colnames(raw_st))
 st <- 
@@ -118,57 +223,6 @@ st <-
   tbl_df()
 ```
 
-### Species names
-
-**TODO**: add some text
-
-```{r}
-url <- "https://datras.ices.dk/WebServices/DATRASWebService.asmx/getSpecies?codename=tsn&code=126438"
-out <- icesDatras:::readDatras(url)
-out <- icesDatras:::parseDatras(out)
-out
-load("data/nsibts_raw.rda")
-sp <- 
-  raw_le %>% 
-  select(speccodetype = SpecCodeType, speccode = SpecCode) %>% 
-  distinct() %>% 
-  mutate(speccode = as.integer(speccode)) %>% 
-  filter(!is.na(speccode))
-tsn <- 
-  sp %>% 
-  filter(speccodetype == "T")
-out.tsn <- list()
-for(i in 1:nrow(tsn)) {
-  out.tsn[[i]] <- paste0("https://datras.ices.dk/WebServices/DATRASWebService.asmx/getSpecies?codename=tsn&code=",
-                tsn$speccode[i]) %>% 
-    icesDatras:::readDatras() %>% 
-    icesDatras:::parseDatras()
-}
-
-aphia <- 
-  sp %>% 
-  filter(speccodetype == "W")
-
-out.aphia <- list()
-for(i in 1:nrow(aphia)) {
-  out.aphia[[i]] <- 
-    paste0("https://datras.ices.dk/WebServices/DATRASWebService.asmx/getSpecies?codename=aphia&code=",
-                aphia$speccode[i]) %>% 
-    icesDatras:::readDatras() %>% 
-    icesDatras:::parseDatras()
-}
-
-sp <-
-  bind_rows(out.tsn) %>% 
-  bind_rows(bind_rows(out.aphia)) %>% 
-  tbl_df() %>% 
-  select(aphia, tsn, latin = latinname) %>% 
-  distinct() %>% 
-  arrange(latin) %>% 
-  gather(speccodetype, speccode, -latin) %>% 
-  mutate(speccodetype = ifelse(speccodetype == "aphia", "W", "T"))
-```
-
 ### The length data
 
 Processing:
@@ -185,6 +239,7 @@ Processing:
 * Select only variable that are needed in further processing
     
 ```{r, message = FALSE, warning = FALSE, eval = FALSE}
+colnames(species_code) <- tolower(colnames(species_code))
 colnames(raw_le) <- tolower(colnames(raw_le))
 le <-
   raw_le %>%
@@ -207,7 +262,7 @@ le <-
                     hlnoatlngt * 60 / hauldur,
                     hlnoatlngt)) %>% 
   # join with latin name
-  left_join(sp) %>%
+  left_join(species_code) %>%
   # select only needed columns
   select(id, latin, sex, length, n) %>% 
   tbl_df()
@@ -223,13 +278,13 @@ ag <-
   # turn everything to cm
   mutate(length = ifelse(!lngtcode %in% c("1"), lngtclass / 10, lngtclass), 
          indwgt = ifelse(indwgt <= 0, NA, indwgt)) %>% 
-  left_join(sp) %>% 
+  left_join(species_code) %>% 
   select(id, latin, length, sex, maturity, age, wgt = indwgt, n = noatalk) 
 ```
 
 ### Save stuff for later use
 
 ```{r, eval = FALSE}
-save(st, le, ag, sp, ns_area, file = "data/nsibts_tidy.rda")
+save(st, le, ag, species_code, ns_area, file = "data/nsibts_tidy.rda")
 ```
 

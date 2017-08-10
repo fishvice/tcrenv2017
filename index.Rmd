@@ -51,7 +51,7 @@ ___
 
 #### [Getting started with ggplot](pre_ggplot.html)
 
-#### ...
+#### [Getting started with dplyr](pre_dplyr.html)
 
 #### [Applied grammar and then some](pre_grammar2.html)
 
