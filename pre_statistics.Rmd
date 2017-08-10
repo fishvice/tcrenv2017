@@ -32,20 +32,28 @@ library(lubridate)
 
 ```{r,message=FALSE,warning=FALSE}
 minke <- read_csv("http://www.hafro.is/~einarhj/data/minke.csv")
-ellidaar <- read_csv('http://www.hafro.is/~einarhj/education/ofcouRse2016/data/ellidaar.csv')
+load(url("http://www.hafro.is/~einarhj/data/nsibts_tidy.rda"))
 ```
 
-For those interested, here is an example of how to eliminate [Icelandic characters from data](http://www.hafro.is/~einarhj/education/ofcouRse2016/ice_elim.html)
+and do a bit of data processing:
+
+```{r}
+d <- 
+  ag %>% 
+  filter(latin == 'Gadus morhua', !is.na(wgt)) %>% 
+  left_join(st)
+```
+
 
 # Today
 
 We will review some of the statistical methods available in the R environment and present pointers on how to use and present the results. Among the topics covered are
 
+* Linear regression
+* Non-linear models
 * Inferences related to categorical variables
 * Inferences related to numerical variables
 * Analysis of variance
-* Linear regression
-* Non-linear models
 
 Here it is assumed that the course participants are familiar with basic concepts of statistics, but for those who are interested there are a number of good resources on-line, among those are:
 
@@ -54,249 +62,7 @@ Here it is assumed that the course participants are familiar with basic concepts
 * [Tutor-Web](http://tutor-web.net)
 * [Stats on StackExchange](http://stats.stackexchange.com/)
 
-# Inferences related to categorical variables
 
-## Equality of proportions in a population
-
-Say we have a group $G$, and the probability of being in this group is $p$ (and conversely not being in group $G$ has a probability of $q=1-p$) and we want to investigate the properties of $p$. Then we want to do a binomial test. Essentially this is a hypothesis test of the form
-$$H_0:\qquad p = \mu$$ vs one the following $$H_1 : \qquad p¸\neq \mu \quad\vee \quad p < \mu \quad \vee \quad p>\mu $$
-In R this is done using `binom.test`:
-```{r,eval=FALSE}
-binom.test(x = Num.success,   ## number of successes (entries in group G)
-           n = Num.trials,    ## total number of trials (size of population)
-           p = mu,            ## the hypothesised propability
-           alternative = 'two.sided')
-```
-
-
-To illustrate this take the sex ratio from the Ellidaar data and ask the question, is the ratio even? 
-
-```{r}
-## restrict the data to only male and females
-ell.kyn <- 
-  ellidaar %>% 
-  filter(kyn %in% c('haengur','hrygna')) %>% 
-  mutate(year = year(dags))
-```
-
-Now test the hypothesis that the sex ratio is even:
-
-```{r}
-kyn.tab <- table(ell.kyn$kyn)
-
-binom.test(kyn.tab)
-```
-
-We see immediately that the sex ratio is not even in the dataset, i.e. the null hypothesis is rejected. In addition we see that the `binom.test` function calculates an estimate for the ratio and a 95% confidence interval. These values can be saved into a data.frame using the `tidy` function from the `broom` package:
-
-```{r}
-binom.test(kyn.tab) %>% 
-  tidy()
-```
-
-`binom.test` allows for slight variations in t
-
-
-## Comparing two or more population proportions
-
-Expanding the binomial test above, say if we wanted to look at whether the sex ratio differs by year, wwe will need to use a $\chi^2$-test. Essentially the $\chi^2$-test compares the propability of being in group $G$ by category $i$, i.e. tests a hypothesis of the form:
-
-$$H_0 : \qquad p_1=p_2=\ldots=p_n$$
-
-vs. 
-
-$$H_1 : \qquad \exists i,j\quad s.t\quad p_i\neq p_j$$
-
-The `chisq.test` has a range of options:
-```{r,eval=FALSE}
-chisq.test(Cat1,                   ## Factor indicating group assignment
-           Cat2,                   ## -- || --
-           p,                      ## if y is null, these are the proportions in 
-                                   ## each of factor levels
-           simulate.p.value = FALSE) ## should the p-value be simulated using MC methods
-```
-
-Taking this to our river data, we want to test if the sex ratio is different between years:
-```{r}
-chisq.test(ell.kyn$kyn,ell.kyn$year)
-```
-
-and again we can use `tidy` to get the estimates and test statistics from the test:
-```{r}
-chisq.test(ell.kyn$kyn,ell.kyn$year) %>% 
-  tidy()
-```
-
-### Excercise
-
-* Is the proportion of fish caught using a fly significantly different from other gear types? 
-* Are the number of releases significantly different between the sexes?
-
-
-# Inferences related to numerical variables
-
-## Comparing means
-
-When comparing means there are a number of situations that one might be interested in:
-
-* Is the population mean equal to a certain number? 
-* Are means of two populations equal?
-* Is there an increase between measurements from the same subject?
-
-This is all done using a $t$-test:
-```{r,eval=FALSE}
-t.test(x,                         ## measurements from population 1
-       y,                         ## measurements from population 2
-       mu,                        ## true difference between populations
-       paired = FALSE,            ## is this a paired test
-       alternative = "two.sided") ## the alternative hypothesis
-```
-
-Note that by default `t.test` corrects for difference is variance between populations, this can be turned off by setting `var.equal` to `TRUE` when calling `t.test`.
-
-### One population
-
-Looking at the mean length in the river data:
-
-```{r}
-t.test(ell.kyn$lengd.cm)
-```
-
-we see that the mean length is significantly different from 0. Notice that the `t.test` gives the confidence interval for the mean length. 
-
-And as usual we can get the output using `tidy`
-```{r}
-t.test(ell.kyn$lengd.cm) %>% 
-  tidy()
-```
-
-### Two populations
-
-Lets test if the mean length is significantly different between males and females:
-```{r}
-males <- ell.kyn %>% filter(kyn == 'haengur')
-females <- ell.kyn %>% filter(kyn == 'hrygna')
-
-t.test(males$lengd.cm,females$lengd.cm)
-```
-
-and we can set the alternative hypothesis such that the males are smaller than females:
-```{r}
-t.test(males$lengd.cm,females$lengd.cm,alternative = 'less')
-```
-
-Then we cannot reject the hypothesis that the true difference is 0. 
-
-## Comparing variance of two (or more) populations
-
-When we want to test wheather the variances of two (or more) populations are equal, i.e. test a hypothesis of the form:
-
-$$H_0 :\qquad \sigma_1^2=\sigma_2^2=\ldots=\sigma_n^2$$
-vs.
-$$ H_1 : \qquad \exists i,j\quad s.t.\quad \sigma_i^2\neq\sigma_j^2 $$
-one can use Bartlett's test of homogeneitiy of variances:
-```{r,eval=FALSE}
-bartlett.test(x,  ## measurements by group
-              g)  ## factor indicating group
-```
-
-As an example we can ask if the variances in length are constant between the sexes:
-```{r}
-bartlett.test(ell.kyn$lengd.cm,
-              ell.kyn$kyn)
-```
-### Exercise
-* Do males and females differ significantly in weight?
-* What is the confidence interval for the mean length of males?
-
-
-# Analysis of variance
-
-Analysis of variance (or ANOVA) is essentially a test for the equality of means between two (or more) gropus. In general the hypothesis we want to test are of the form:
-$$H_0 :\qquad \mu_1=\mu_2=\ldots=\mu_n$$
-vs.
-$$ H_1 : \qquad \exists i,j\quad s.t.\quad \mu_i\neq\mu_j $$
-In R one uses the `aov` function to test this class of hypotheses:
-```{r,eval=FALSE}
-aov(y~x, data = dat)
-```
-This need a bit of explaining. The first part of the `aov` input is a formula object. A formula is generally of the form:
-$$ y \tilde \quad x$$
-where $y$ is the reponse variable and $x$ is the predictor variable. Formulas call on columns from the data and can be composed of number of components:
-
-```{r,eval=FALSE}
-+       ## add variables to the formula
--       ## remove variable
-:       ## interaction, written x:y
-*       ## x*y is a shorthand for x + y + x:y
-/       ## x/y is a shorthand for x + x:y
-|       ## x|y is x conditioned on the values of y
-I()     ## include a new variable based on the calculations within the parenthesis
--1      ## no intercept term
-```
-
-
-## One-way anova
-As illustration of how one would perform an ANOVA in R consider the mean length caught by year:
-
-```{r}
-ggplot(ell.kyn,aes(year,lengd.cm,group=round(year))) + geom_boxplot()
-```
-
-
-
-```{r}
-## note we need change the year to factor 
-fit <- aov(lengd.cm~as.factor(year),data=ell.kyn)
-fit
-```
-To get the results from the ANOVA one typically needs to use the `summary` function:
-```{r}
-summary(fit)
-```
-where we see the mean length is significantly different by year. And as above we can use `tidy`
-```{r}
-fit %>% tidy()
-```
-
-Now this is all well and good, but we now need to know which of these years are significantly different. This can be done using Tukey test, implemented using the `lsmeans` function:
-```{r}
-fit %>% lsmeans(pairwise~year)
-```
-But getting the results to a data.frame is bit more involved:
-```{r}
-ls.fit <- fit %>% lsmeans(pairwise~year)
-ls.cont <- ls.fit$contrasts %>% summary() %>% as_data_frame()
-ls.cont
-```
-And to find the years:
-```{r}
-ls.cont %>% filter(p.value < 0.05)
-```
-
-## Two way anova example
-As an example of how to do a two way anova with interactions, consider length by sex and year: 
-```{r}
-ggplot(ell.kyn,aes(year,lengd.cm, group=interaction(round(year),kyn),fill = kyn)) +
-  geom_boxplot()
-```
-
-```{r}
-two.way <- aov(lengd.cm~kyn*as.factor(year),data=ell.kyn)
-```
-and we can test significance using `summary`:
-```{r}
-summary(two.way)
-```
-or using variable deletion using `drop1`:
-```{r}
-drop1(two.way,test='F')
-```
-here we see that the interaction is significant. 
-
-### Excercise 
-
-* Test if the weight is significantly different by year
 
 # Linear regression
 
@@ -310,7 +76,7 @@ data_frame(x=1:100/10,y=x + rnorm(100,sd=1)) %>%
 The best line is the one that minimizes the difference between the data and the (model) predictions. Typically the model is of the form:
 $$ y = \alpha + \beta x + \ldots $$
 
-And typicall the inferences we are interested in are of the form:
+And typically the inferences we are interested in are of the form:
 $$H_0 : \qquad \beta = 0 $$
 vs.
 $$H_1 : \qquat \beta \neq 0 $$
@@ -324,22 +90,22 @@ lm(y~x, data=dat)
 
 Now as an example consider the length weight relationship:
 ```{r}
-ggplot(ell.kyn,aes(lengd.cm,thyngd.kg,col=kyn)) + geom_point()
+ggplot(d,aes(length,wgt,col=sex)) + geom_point()
 ```
 
 we see that the relationship between length and weight is probably not linear but as first approximation try that:
 ```{r}
-fit <- lm(thyngd.kg~lengd.cm,data=ell.kyn)
+fit <- lm(wgt~length,data=d)
 fit
 ```
-hmm fish a 0 cm is -4 kg. That is not really plausible. But look at the usual summaries:
+hmm fish a 0 cm is -2.4 kg. That is not really plausible. But look at the usual summaries:
 ```{r}
 summary(fit)
 ```
 
 But let's do something more realistic and log transform the data:
 ```{r}
-fit <- lm(log10(thyngd.kg)~log10(lengd.cm),data=ell.kyn)
+fit <- lm(log10(wgt)~log10(length),data=d)
 fit
 ```
 
@@ -347,18 +113,18 @@ This looks more sensible. Now lets plot the results:
 ```{r}
 fit %>% 
   augment() %>%
-  mutate(lengd.cm = 10^log10.lengd.cm.,
-         thyngd.kg = 10^.fitted) %>% 
-  ggplot(aes(lengd.cm,thyngd.kg)) + geom_point(data=ell.kyn) + geom_line()
+  mutate(length = 10^log10.length.,
+         wgt = 10^.fitted) %>% 
+  ggplot(aes(length,wgt)) + geom_point(data=d) + geom_line()
 ```
 
 One can the add variable to the regression by adding to the formula:
 ```{r}
-fit.kyn <- lm(log10(thyngd.kg)~log10(lengd.cm)+kyn,data=ell.kyn)
-summary(fit.kyn)
+fit2 <- lm(log10(wgt)~log10(length)+sex,data=d)
+summary(fit2)
 ```
 
-### Exercise
+#### Exercise
 
 * Check if there is a significant interaction effect between sex and length in the weight
 
@@ -366,15 +132,15 @@ summary(fit.kyn)
 ## Model fitting and diagnostics
 There is a whole host of different tools that are useful when building regression type models. If we want perform a stepwise model selection we can use the `step` function 
 ```{r}
-step(fit.kyn)
+step(fit2)
 ```
 
 `step` iteratively applies `drop1` to the model until the AIC cannot be improved. Lets try a bigger model:
 
 ```{r}
-fit.full <- lm(log10(thyngd.kg)~log10(lengd.cm)*kyn + stada + veidarfaeri + 
-                 as.factor(year) + sleppt,
-               ell.kyn)
+fit.full <- lm(log10(wgt)~log10(length)*sex + country + depth + 
+                 as.factor(year),
+               d)
 summary(fit.full)
 ```
 
@@ -441,5 +207,250 @@ minke.vonB.par %>%
   augment() %>% 
   ggplot(aes(age,length)) + geom_point() + geom_line(aes(y=.fitted))
 ```
+
+
+# Inferences related to categorical variables
+
+## Equality of proportions in a population
+
+Say we have a group $G$, and the probability of being in this group is $p$ (and conversely not being in group $G$ has a probability of $q=1-p$) and we want to investigate the properties of $p$. Then we want to do a binomial test. Essentially this is a hypothesis test of the form
+$$H_0:\qquad p = \mu$$ vs one the following $$H_1 : \qquad p¸\neq \mu \quad\vee \quad p < \mu \quad \vee \quad p>\mu $$
+In R this is done using `binom.test`:
+```{r,eval=FALSE}
+binom.test(x = Num.success,   ## number of successes (entries in group G)
+           n = Num.trials,    ## total number of trials (size of population)
+           p = mu,            ## the hypothesised propability
+           alternative = 'two.sided')
+```
+
+
+To illustrate this take the sex ratio from the Ellidaar data and ask the question, is the ratio even? 
+
+```{r}
+## restrict the data to only male and females
+d2 <- 
+  d %>% 
+  filter(sex %in% c('M','F'))
+```
+
+Now test the hypothesis that the sex ratio is even:
+
+```{r}
+kyn.tab <- table(d2$sex)
+
+binom.test(kyn.tab)
+```
+
+We see immediately that the sex ratio is not even in the dataset, i.e. the null hypothesis is rejected. In addition we see that the `binom.test` function calculates an estimate for the ratio and a 95% confidence interval. These values can be saved into a data.frame using the `tidy` function from the `broom` package:
+
+```{r}
+binom.test(kyn.tab) %>% 
+  tidy()
+```
+
+`binom.test` allows for slight variations in t
+
+
+## Comparing two or more population proportions
+
+Expanding the binomial test above, say if we wanted to look at whether the sex ratio differs by year, wwe will need to use a $\chi^2$-test. Essentially the $\chi^2$-test compares the propability of being in group $G$ by category $i$, i.e. tests a hypothesis of the form:
+
+$$H_0 : \qquad p_1=p_2=\ldots=p_n$$
+
+vs. 
+
+$$H_1 : \qquad \exists i,j\quad s.t\quad p_i\neq p_j$$
+
+The `chisq.test` has a range of options:
+```{r,eval=FALSE}
+chisq.test(Cat1,                   ## Factor indicating group assignment
+           Cat2,                   ## -- || --
+           p,                      ## if y is null, these are the proportions in 
+                                   ## each of factor levels
+           simulate.p.value = FALSE) ## should the p-value be simulated using MC methods
+```
+
+Taking this to our river data, we want to test if the sex ratio is different between years:
+```{r}
+chisq.test(d2$sex,d2$year)
+```
+
+and again we can use `tidy` to get the estimates and test statistics from the test:
+```{r}
+chisq.test(d2$sex,d2$year) %>% 
+  tidy()
+```
+
+### Excercise
+
+* Is the proportion of fish caught using a fly significantly different from other gear types? 
+* Are the number of releases significantly different between the sexes?
+
+
+# Inferences related to numerical variables
+
+## Comparing means
+
+When comparing means there are a number of situations that one might be interested in:
+
+* Is the population mean equal to a certain number? 
+* Are means of two populations equal?
+* Is there an increase between measurements from the same subject?
+
+This is all done using a $t$-test:
+```{r,eval=FALSE}
+t.test(x,                         ## measurements from population 1
+       y,                         ## measurements from population 2
+       mu,                        ## true difference between populations
+       paired = FALSE,            ## is this a paired test
+       alternative = "two.sided") ## the alternative hypothesis
+```
+
+Note that by default `t.test` corrects for difference is variance between populations, this can be turned off by setting `var.equal` to `TRUE` when calling `t.test`.
+
+### One population
+
+Looking at the mean length in the river data:
+
+```{r}
+t.test(d$length)
+```
+
+we see that the mean length is significantly different from 0. Notice that the `t.test` gives the confidence interval for the mean length. 
+
+And as usual we can get the output using `tidy`
+```{r}
+t.test(d$length) %>% 
+  tidy()
+```
+
+### Two populations
+
+Lets test if the mean length is significantly different between males and females:
+```{r}
+males <- d %>% filter(sex == 'M')
+females <- d %>% filter(sex == 'F')
+
+t.test(males$length,females$length)
+```
+
+and we can set the alternative hypothesis such that the males are smaller than females:
+```{r}
+t.test(males$length,females$length,alternative = 'less')
+```
+
+Then we cannot reject the hypothesis that the true difference is 0. 
+
+## Comparing variance of two (or more) populations
+
+When we want to test wheather the variances of two (or more) populations are equal, i.e. test a hypothesis of the form:
+
+$$H_0 :\qquad \sigma_1^2=\sigma_2^2=\ldots=\sigma_n^2$$
+vs.
+$$ H_1 : \qquad \exists i,j\quad s.t.\quad \sigma_i^2\neq\sigma_j^2 $$
+one can use Bartlett's test of homogeneitiy of variances:
+```{r,eval=FALSE}
+bartlett.test(x,  ## measurements by group
+              g)  ## factor indicating group
+```
+
+As an example we can ask if the variances in length are constant between the sexes:
+```{r}
+bartlett.test(d2$length,
+              d2$sex)
+```
+### Exercise
+* Do males and females differ significantly in weight?
+* What is the confidence interval for the mean length of males?
+
+
+# Analysis of variance
+
+Analysis of variance (or ANOVA) is essentially a test for the equality of means between two (or more) gropus. In general the hypothesis we want to test are of the form:
+$$H_0 :\qquad \mu_1=\mu_2=\ldots=\mu_n$$
+vs.
+$$ H_1 : \qquad \exists i,j\quad s.t.\quad \mu_i\neq\mu_j $$
+In R one uses the `aov` function to test this class of hypotheses:
+```{r,eval=FALSE}
+aov(y~x, data = dat)
+```
+This need a bit of explaining. The first part of the `aov` input is a formula object. A formula is generally of the form:
+$$ y \tilde \quad x$$
+where $y$ is the reponse variable and $x$ is the predictor variable. Formulas call on columns from the data and can be composed of number of components:
+
+```{r,eval=FALSE}
++       ## add variables to the formula
+-       ## remove variable
+:       ## interaction, written x:y
+*       ## x*y is a shorthand for x + y + x:y
+/       ## x/y is a shorthand for x + x:y
+|       ## x|y is x conditioned on the values of y
+I()     ## include a new variable based on the calculations within the parenthesis
+-1      ## no intercept term
+```
+
+
+## One-way anova
+As illustration of how one would perform an ANOVA in R consider the mean length caught by year:
+
+```{r}
+ggplot(d,aes(year,length,group=round(year))) + geom_boxplot()
+```
+
+
+
+```{r}
+## note we need change the year to factor 
+fit <- aov(length~as.factor(year),data=d)
+fit
+```
+To get the results from the ANOVA one typically needs to use the `summary` function:
+```{r}
+summary(fit)
+```
+where we see the mean length is significantly different by year. And as above we can use `tidy`
+```{r}
+fit %>% tidy()
+```
+
+Now this is all well and good, but we now need to know which of these years are significantly different. This can be done using Tukey test, implemented using the `lsmeans` function:
+```{r}
+fit %>% lsmeans(pairwise~year)
+```
+But getting the results to a data.frame is bit more involved:
+```{r}
+ls.fit <- fit %>% lsmeans(pairwise~year)
+ls.cont <- ls.fit$contrasts %>% summary() %>% as_data_frame()
+ls.cont
+```
+And to find the years:
+```{r}
+ls.cont %>% filter(p.value < 0.05)
+```
+
+## Two way anova example
+As an example of how to do a two way anova with interactions, consider length by sex and year: 
+```{r}
+ggplot(d,aes(year,length, group=interaction(round(year),sex),fill = sex)) +
+  geom_boxplot()
+```
+
+```{r}
+two.way <- aov(length~sex*as.factor(year),data=d)
+```
+and we can test significance using `summary`:
+```{r}
+summary(two.way)
+```
+or using variable deletion using `drop1`:
+```{r}
+drop1(two.way,test='F')
+```
+here we see that the interaction is significant. 
+
+### Excercise 
+
+* Test if the weight is significantly different by year
+
 
 
