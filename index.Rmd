@@ -47,7 +47,7 @@ We taught this course first time in ICES last year. Last years course [site](htt
 ### Presentation
 ___
 
-#### ...
+#### [Getting data into R](pre_data.html)
 
 #### [Getting started with ggplot](pre_ggplot.html)
 
@@ -55,9 +55,13 @@ ___
 
 #### [Applied grammar and then some](pre_grammar2.html)
 
-#### ...
-
 #### [Working with dates](pre_dates.html)
+
+#### [Reproducible research with R](pre_markdown.html)
+
+#### [Statistic in R](pre_statistics.html)
+
+#### Mapping, ... pending
 
 ### Bits and pieces
 ___
@@ -66,9 +70,7 @@ ___
 
 #### [Generating a package](b_packages.html)
 
-#### [Working with dates](b_dates.html)
-
-* **TODO**: Revamp, add examples of difference in dates
+#### [Working with strings](b_strings.html)
 
 #### ...
 
