@@ -61,7 +61,9 @@ ___
 
 #### [Statistic in R](pre_statistics.html)
 
-#### Mapping, ... pending
+#### [Plotting spatial data](pre_ggplot2.html)
+
+#### ...
 
 ### Bits and pieces
 ___
