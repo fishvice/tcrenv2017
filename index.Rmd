@@ -91,6 +91,8 @@ ___
 ### Presentation
 ___
 
+#### [Introduction](pre_intro.html)
+
 #### [Getting data into R](pre_data.html)
 
 #### [Getting started with ggplot](pre_ggplot.html)
