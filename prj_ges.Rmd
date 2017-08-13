@@ -16,7 +16,7 @@ knitr::opts_chunk$set(warning = FALSE,
 ## Preamble
 ___
 
-Considerable effort has been made in recent years to develop ecosystem indicators to assess the overall status of an ecosystem. These range from being fairly simple measures derived from observations, i.e. the large fish indicator (LFI), to more elaborate indicies such as the size of the spawning stock biomass.
+Considerable effort has been made in recent years to develop ecosystem indicators to assess the overall status of an ecosystem. These range from being fairly simple measures derived from observations, i.e. the large fish indicator (LFI), to more elaborate indices such as the size of the spawning stock biomass.
 
 A general discussion for these indicators can be found [here](http://ec.europa.eu/environment/marine/good-environmental-status/index_en.htm) but in here we will focus on indicators for biodiversity as implemented in Greenstreet et. al (2015) - based on the North Sea data (you could try it for any other data set). Estimates of growth and maturation parameters can potentially be read from FishBase. 
 

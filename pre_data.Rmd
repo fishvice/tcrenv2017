@@ -10,6 +10,11 @@ output:
     toc_float: yes
 ---
 
+```{r, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
+```
+
 ```{r}
 library(tidyverse)
 library(haven)
@@ -41,8 +46,6 @@ ggplot(d,aes(length,weight)) + geom_point()
 
 R even has a built data entry window:
 ```{r,eval=FALSE}
-
-
 dat <- data.frame(id=numeric(0), species=character(0),
                   length=numeric(0),age=numeric(0),
                   lat = numeric(0),lon=numeric(0))
@@ -102,6 +105,11 @@ d <- read_function('http://somwhereontheweb.com/nameOfFile.txt')
 ```
 
 Now reading in the minke whale dataset, assuming it is located in the working directory in a directory named "data", the data import is simply:
+
+```{r, echo = FALSE, eval = FALSE}
+download.file("http://www.hafro.is/~einarhj/data/minke.csv", destfile = "data/minke.csv")
+```
+
 ```{r}
 minke <- 
   read_csv('data/minke.csv')
@@ -137,7 +145,7 @@ col1 col2 col3
 When importing data into R it is fairly useful to have the following in mind
 
 * Does each variable have its own column and each subject it own line?
-* Are there any unecessary lines or columns?
+* Are there any unnecessary lines or columns?
 * Do the data contain any non-US characters?
 * Are there gaps in the data?
 * Are the results entered consistently?
@@ -268,7 +276,6 @@ db <- src_sqlite('minke.db',create = TRUE)
 
 dump data into it
 ```{r,eval=FALSE}
-
 tmp <- copy_to(db,minke,'minke_tbl')
 ```
 

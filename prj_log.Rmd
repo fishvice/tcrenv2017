@@ -13,7 +13,7 @@ knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE)
 ```
 
-**TODO**: Should preferrable try something like a glm-model. But then would need all the data.
+**TODO**: Should preferable try something like a glm-model. But then would need all the data.
 
 ## Preamble
 ___
@@ -32,10 +32,10 @@ __logbook_station__: Contains information about each fishing operation
 __logbook_catch__: Contains information about the catch composition (no subsampling, no detail length measurements)
 
 * __id__: Fishing operation id
-* __species__: Native icelandic species code
+* __species__: Native Icelandic species code
 * __catch__: Catch in kilograms
 
-We want to end with some analysis that show the distribution of total effort, total catch and catches by some selected species, e.g. by ICES statistical rectangle. And more importantly via some finer arbritrary rectangle size.
+We want to end with some analysis that show the distribution of total effort, total catch and catches by some selected species, e.g. by ICES statistical rectangle. And more importantly via some finer arbitrary rectangle size.
 
 ## Suggested procedure
 ___

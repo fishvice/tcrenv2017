@@ -75,7 +75,7 @@ The class:
 ```{r}
 class(p)
 ```
-The structure (a bit of latin - not run here):
+The structure (a bit of Latin - not run here):
 ```{r, eval = FALSE}
 str(p)
 ```
@@ -145,7 +145,7 @@ p + geom_point(aes(age, length, shape = maturity), size = 2)
 # Facetting
 ___
 
-Splitting a graph into subsets based on a categorial variable. 
+Splitting a graph into subsets based on a categorical variable. 
 
 ```{r}
 ggplot(d) + 
@@ -223,7 +223,7 @@ table(d$maturity, useNA = "ifany")
 
 ### histograms
 
-For continous data one uses the 'geom_histogram'-function (left default bin-number, right bindwith specified as 50 cm): 
+For continuous data one uses the 'geom_histogram'-function (left default bin-number, right bindwith specified as 50 cm): 
 
 ```{r, out.width = "50%", fig.show = "hold"}
 p <- ggplot(d, aes(length))
@@ -231,7 +231,7 @@ p + geom_histogram()
 p + geom_histogram(binwidth = 50)
 ```
 
-One can add another varible (left) or better use facet (right):
+One can add another variable (left) or better use facet (right):
 
 ```{r, out.width = "50%", fig.show = "hold"}
 p + geom_histogram(aes(fill = sex))
@@ -240,7 +240,7 @@ p + geom_histogram() + facet_wrap(~ sex, ncol = 1)
 
 ### Frequency polygons
 
-Alternatives to histograms for continuous data are frequency polyogons:
+Alternatives to histograms for continuous data are frequency polygons:
 ```{r, out.width = "50%", fig.show = "hold"}
 p + geom_freqpoly(lwd = 1)
 p + geom_freqpoly(aes(colour = sex), lwd = 1)
@@ -255,7 +255,7 @@ p <- ggplot(d, aes(reorder(maturity, length), length)) + geom_boxplot()
 p
 ```
 
-It is sometimes juseful to plot the "raw" data over summary plots. Using `geom_point` as an overlay of the above plot (left) is not very useful, `geom_jitter` coming to the rescue (right):
+It is sometimes useful to plot the "raw" data over summary plots. Using `geom_point` as an overlay of the above plot (left) is not very useful, `geom_jitter` coming to the rescue (right):
 ```{r, out.width = "50%", fig.show = "hold"}
 p + geom_point(colour = "red", alpha = 0.5, size = 1)
 p + geom_jitter(colour = "red", alpha = 0.5, size = 1)
@@ -265,7 +265,7 @@ p + geom_jitter(colour = "red", alpha = 0.5, size = 1)
 
 Using `stat_summary` one can call specific summary statistics. Here are examples of 4 plots, going from top-left to bottom right we have:
 
-* Raw data with median lenght at age (red) superimposed
+* Raw data with median length at age (red) superimposed
 * A pointrange plot showing the mean and the range
 * A pointrange plot showing the mean and the standard error
 * A pointrange plot showing the bootstrap mean and standard error
@@ -321,7 +321,7 @@ p + geom_jitter() + ylim(600, 800)
 p + geom_jitter() + ylim(NA, 800) # setting only upper limit
 ```
 
-For descrete variables:
+For discrete variables:
 
 ```{r}
 p + geom_jitter() + ylim(600,800) + xlim("immature","mature")

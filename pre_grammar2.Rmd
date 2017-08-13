@@ -46,14 +46,14 @@ Given the above the data are often stored in separate tables. Here we have three
 
 Dataframe **st**, it contains the following fields:
 
-  * __id__: Unique station id which for the Datras data is a combination of the variables year, quarter, ship, gear and haulno.
+  * __id__: Unique station id which for the DATRAS data is a combination of the variables year, quarter, ship, gear and haulno.
   * __survey__: Survey identification (in the case example "NS-IBTS")
   * __quarter__: The quarter in which the survey is conducted
   * __ship__: Ship identification code
   * __gear__: Gear code
   * __haulno__: XXX
   * __hauldur__: Duration of haul in minutes
-  * __shootlat__: Latitute of the haul start location
+  * __shootlat__: Latitude of the haul start location
   * __shootlong__: Longitude of the haul start location
   * __datetime__: Haul start time
   * __depth__: Bottom depth in meters
@@ -158,7 +158,7 @@ ggplot(st, aes(shootlong, shootlat)) + geom_point() + coord_map()
 
 #### 3. Subset (filter) the length table
 
-* The year is not stored as a seperate variable in the `le` dataframe.
+* The year is not stored as a separate variable in the `le` dataframe.
 * So limit the data by using the station id in the `st` dataframe
 
 ```{r le}
@@ -266,11 +266,11 @@ Note that there where only three things needed to turn the script into a functio
 
 * The first line where we name the function and pass the data (*le*, *a*, *p* and *scale*) to the function call as **arguements**
 * Wrapped the script inside `{ }`
-* The last three arguments to the function, passsing values for *a*, *p* and *scale*, was not really needed. We could just as well have used the "hardwired" values as in the script above.
+* The last three arguments to the function, passing values for *a*, *p* and *scale*, was not really needed. We could just as well have used the "hardwired" values as in the script above.
 
 One additional element was also sneaked into the code in the function - wander if you can spot it?
 
-Also, take note that here we pass the length dataframe **1st**. **Then** we pass the "optional" arguements. In these cases a default value is provided within the function-call, but users can override them by providing other values. The relevance of this becomes apparent in the next section.
+Also, take note that here we pass the length dataframe **1st**. **Then** we pass the "optional" arguments. In these cases a default value is provided within the function-call, but users can override them by providing other values. The relevance of this becomes apparent in the next section.
 
 <div class="panel panel-warning">
 <div class="panel-heading">You do</div>
@@ -297,7 +297,7 @@ Lets start from a clean slate by removing all the objects from our global workin
 rm(list = ls())
 ```
 
-Now we need to load the data in again as well as the function we just genarated and saved:
+Now we need to load the data in again as well as the function we just generated and saved:
 ```{r}
 load("data/nsibts_tidy.rda")
 source("R/catch_per_haul_per_length.R")
@@ -316,7 +316,7 @@ In the above example we:
 * We did not override the default values for the additional parameters.
 
 
-**Further readings**: A mininum example for [generating a package](b_packages.html).
+**Further readings**: A minimum example for [generating a package](b_packages.html).
 
 # Annual length frequency distributions
 ___

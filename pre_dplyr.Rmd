@@ -66,9 +66,9 @@ Commonly, when collating summaries by group, one wants to:
 
 For example, one might want to
 
-* fit the same model to differenty rivers
+* fit the same model to different rivers
 * quickly calculate summary statistics for by bait type
-* perform group-wise transformations like scaling or standardising
+* perform group-wise transformations like scaling or standardizing
 
 ## dplyr
 
@@ -328,7 +328,7 @@ grid.raster(img)
 ```
 
 
-Summarise and mutate are somewhat useful on its own but become much more useful when combined with a `group_by` statement
+Summarize and mutate are somewhat useful on its own but become much more useful when combined with a `group_by` statement
 
 * **group_by** Group data into rows with the same value of (a) particular variable(s)
 * **ungroup** Remove grouping information from data frame
@@ -367,7 +367,7 @@ vital.long <-
 vital.long
 ```
 
-Note that the first argument is th name of the key, i.e. the variable created from the column names, the second argument is the name of the value column (the column the stores the actual values) and the third argument specifies the column you want to transform
+Note that the first argument is the name of the key, i.e. the variable created from the column names, the second argument is the name of the value column (the column the stores the actual values) and the third argument specifies the column you want to transform
 
 You can also use negative indexing indicating that those columns should remain intact:
 ```{r}
@@ -407,7 +407,7 @@ head(d.sep)
 
 Separate looks for all possible dividers (i.e. non alphanumeric characters) and uses those to divide the column. One must therefore be careful to specify the new columns correctly.
 
-You can also specify the separtion symbol explicitly:
+You can also specify the separation symbol explicitly:
 
 ```{r}
 d.sep <- 

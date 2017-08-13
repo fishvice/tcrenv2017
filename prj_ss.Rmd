@@ -16,9 +16,9 @@ knitr::opts_chunk$set(warning = FALSE,
 ## Preamble
 ___
 
-One of the backbone of ICES has been annual stock assessment and advice for miriads of stock. An overview of recent advisory documents can be found on the [ICES webpage](http://www.ices.dk/community/advisory-process/Pages/Latest-advice.aspx). The annual assessments have been compiled into a single worksheet (courtesy Martin Pastoors) found in the data-raw directory.
+One of the backbone of ICES has been annual stock assessment and advice for myriads of stock. An overview of recent advisory documents can be found on the [ICES webpage](http://www.ices.dk/community/advisory-process/Pages/Latest-advice.aspx). The annual assessments have been compiled into a single worksheet (courtesy Martin Pastoors) found in the data-raw directory.
 
-For the purpose of this excercise the column of interest are:
+For the purpose of this exercise the column of interest are:
 
 * __FishStock__: Name of the stock in ICES lingo
 * __Species__: Short name of the species
@@ -37,7 +37,7 @@ ___
 * Plot some measure of the mean and variability of the terminal mortality estimates (that would be fishing mortality in year 2014) by e.g. ecoregion and/or some selected species.
 * For each stock, calculate the ration of the contemporary fishing mortality and the fishing mortality estimated in the last assessment. Plot the retrospective patterns for some some selected species.
 * Calculate a summary measure for each stock of the mean bias and the cv's based on the above statistic. Plot the results.
-* Explore further at your leasure.
+* Explore further at your leisure.
 
 ## Potential outcome
 ___

@@ -22,9 +22,9 @@ Reproducible research focuses on answering the following questions:
 Essentially one wants to capture the typical workflow of:
 
 * Preparing data
-* Analysing the data
+* Analyzing the data
 * Report on the findings
-* Then realising that you did something wrong
+* Then realizing that you did something wrong
 * Do it all over again
 
 
@@ -37,8 +37,8 @@ Essentially one wants to capture the typical workflow of:
 A convenient tool to generate reproducible document. A R Markdown document is written in markdown (an easy-to-write plain text format) and contains chunks of embedded R code
 
 * Markdown
-  + Remove HTML tag for higher readibility.
-  + Inline HTML is avaliable.
+  + Remove HTML tag for higher readability.
+  + Inline HTML is available.
 * R markdown
   + Markdown + embedded R code chunks
   + Rmd -> md -> docx, pdf,html
