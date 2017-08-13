@@ -51,65 +51,32 @@ ___
 
 #### Day 1 - Monday
 
-* Introduction:
-    - Rstudio and R projects
-    - knitr, markdown, document writing (html, pdf,  docx)
-    - reproducible analysis using R
-* Getting data into R and out of R:
-    - from ones own computer (text files, excel, ...)
-    - from the web
-    - from API's (ICES Webservices)
-    - from databases (Ram's online Postgres database)
-* The grammar of data and graphics:
-    - Introduction to ggplot2
-    - Introduction to dplyr
+* [Introduction](pre_intro.html)
+* [Reproducible research with R](pre_markdown.html)
+* [Getting data into R](pre_data.html)
 
 #### Day 2 - Tuesday
 
-* The grammar of data and graphics - continued:
-    - Exploratory data analysis and visualization
-* Working with strings and dates
-* The base R equivalence
+* [Getting started with ggplot](pre_ggplot.html)
+* [Getting started with dplyr](pre_dplyr.html)
+* [Working with dates](pre_dates.html)
 
 #### Day 3 - Wednesday
 
-* GIS in R
-    - using ggplot2 and ggmap
-* Case example: Abundance and biomass indices from ICES DATRAS data
+* [Case example](pre_grammar2.html)
+* [Statistic in R](pre_statistics.html)
+* [Plotting spatial data](pre_ggplot10.html)
 
 #### Day 4 - Thursday
 
+* [Case example](pre_grammar2.html), continued ...
 * Applied projects
 
 #### Day 5 - Friday
 
+* Applied projects, continued ...
 * The fundamentals of functions and package writing
-    - Fundamental of functions and documentation
-    - Directory structure and a minimal example
-    - Version control (git) and social coding (www.github.com)
-
-### Presentation
-___
-
-#### [Introduction](pre_intro.html)
-
-#### [Getting data into R](pre_data.html)
-
-#### [Getting started with ggplot](pre_ggplot.html)
-
-#### [Getting started with dplyr](pre_dplyr.html)
-
-#### [Applied grammar and then some](pre_grammar2.html)
-
-#### [Working with dates](pre_dates.html)
-
-#### [Reproducible research with R](pre_markdown.html)
-
-#### [Statistic in R](pre_statistics.html)
-
-#### [Plotting spatial data](pre_ggplot2.html)
-
-#### ...
+* Introduction to version control (git) and social coding (www.github.com)
 
 ### Bits and pieces
 ___

@@ -13,6 +13,14 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 ## Preamble
+___
+
+### The course material
+
+The course material is open source, meaning that the source code is made freely available and may be redistributed and modified.
+
+* The source code for the course material is located at: https://github.com/fishvice/tcrenv2017
+* The course product is rendered at: http://www.hafro.is/~einarhj/education/tcrenv2017
 
 ### Typical science project
 
@@ -59,6 +67,7 @@ We are going to use a set of recently developed tools that fall under the **tidy
 We believe that the tools introduced will get your quickly up and running with your own data, solving >50% of the most common tasks. Going through the [R for Data Science](http://r4ds.had.co.nz) by Grolemund and Hadley (which serves as our basic template for some of course structure) will pick up additional 30+%.
 
 ## Getting started
+___
 
 For this course you need to have R (and Rtools), RStudio and a sweep of packages.
 
@@ -142,7 +151,7 @@ We strongly urge you to get into the habit of splitting your various tasks into 
 
 1. Open R-studio and create a new project: File -> New project ... -> New directory --> Empty project --> ...
 2. Create a new R script: File -> New file -> R Script
-3. Copy the content of [this](http://www.hafro.is/~einarhj/education/tcrenv2017/R/exercise1.R) into the R script.
+3. Copy the content of [this code](http://www.hafro.is/~einarhj/education/tcrenv2017/R/exercise1.R) into the R script.
 3. Save the script, e.g. exercise1.R: File -> Save
 4. We will run each line of code, observe, change, add, and most importantly learn while doing
 5. Once you have gone through the whole script, try: File -> Compile Report ..., choosing the output according to your liking :-)
@@ -151,6 +160,7 @@ We strongly urge you to get into the habit of splitting your various tasks into 
 </div>
 
 ## Packages
+___
 
 ### What are packages?
 
