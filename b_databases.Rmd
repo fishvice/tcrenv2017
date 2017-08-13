@@ -1,0 +1,59 @@
+---
+title: "dplyr and databases"
+output: 
+  html_document:
+    fig_height: 4
+    fig_width: 8
+    highlight: haddock
+    theme: united
+    toc: no
+    toc_float: no
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
+```
+
+The dplyr verbs (functions) work equivalently on local dataframes as on remote databases. See vignette on [Database](https://cran.rstudio.com/web/packages/dplyr/vignettes/databases.html).
+
+Here is an example using the [Rams Legacy Stock Assessment Database](http://ramlegacy.org):
+
+```{r, message = FALSE}
+library(dplyr)
+library(RPostgreSQL)
+library(ggplot2)
+
+ram <- src_postgres(dbname = "srdb", 
+                    host="nautilus-vm.mathstat.dal.ca", 
+                    user ="srdbuser", 
+                    password ="srd6us3r!",
+                    port = 5432,
+                    options="-c search_path=srdb")
+ram
+
+tbl(ram,"assessment")
+tbl(ram,"timeseries")
+
+d <-
+  tbl(ram,"timeseries") %>% 
+  group_by(assessid) %>% 
+  summarise(count = n(),
+            average = mean(tsvalue),  # absolute nonsensical statistics
+            dev = sd(tsvalue))  
+explain(d)                            # the sql query generated (errors have been filed as issues)
+d                                     # see the first 10 lines
+d %>% collect()                       # now collect the data onto computer
+
+
+# From the database directly to a plot:
+tbl(ram, "assessment") %>%
+  filter(stockid == "CODICE") %>%
+  select(assessid) %>%
+  left_join(tbl(ram, "timeseries")) %>% 
+  select(tsyear, tsvalue, tsid) %>% 
+  collect() %>%    # only in this step is the whole dataset downloaded
+  ggplot() +
+  geom_line(aes(tsyear, tsvalue)) +
+  facet_wrap(~ tsid, scale = "free_y")
+```

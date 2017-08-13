@@ -81,11 +81,14 @@ ___
 ### Bits and pieces
 ___
 
-#### [Accessing fishbase data](b_fishbase.html)
 
 #### [Generating a package](b_packages.html)
 
 #### [Working with strings](b_strings.html)
+
+#### [dplyr and databases](b_databases.html)
+
+#### [Accessing fishbase data](b_fishbase.html)
 
 #### ...
 
