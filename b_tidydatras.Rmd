@@ -148,7 +148,6 @@ species_code <-
   distinct()
 ```
 
-
 Secondly we want to get the NSIBT area, split as well into "Roundfish" subareas
 ```{r, eval = FALSE}
 tmp <- tempfile()
@@ -173,7 +172,7 @@ save(raw_st, raw_le, raw_ag, species_code, ns_area, file = "data/nsibts_raw.rda"
 
 If one then were to start a session at a **later** time the easiest (and least confusing for beginners) is to use the function `load` to get the data into the global environment: 
 ```{r}
-load("data/nsibts_raw.rda")
+attach("data/nsibts_raw.rda")
 ```
 
 To get an overview of what is in store lets call the `glimpse`-function:
@@ -200,7 +199,7 @@ The number of variables in each of the dataframes may look overwhelming. Fortuna
 ```{r, message = FALSE, warning = FALSE, eval = FALSE}
 # Turn column names lower case
 colnames(raw_st) <- tolower(colnames(raw_st))
-st <- 
+tidy_st <- 
   raw_st %>% 
   # create a unique station id
   unite(id, year, quarter, ship, gear, haulno, remove = FALSE) %>%
@@ -241,7 +240,7 @@ Processing:
 ```{r, message = FALSE, warning = FALSE, eval = FALSE}
 colnames(species_code) <- tolower(colnames(species_code))
 colnames(raw_le) <- tolower(colnames(raw_le))
-le <-
+tidy_le <-
   raw_le %>%
   distinct() %>%
   filter(!is.na(speccode), !is.na(lngtclass), !is.na(lngtcode)) %>%
@@ -251,28 +250,28 @@ le <-
   unite(id, year, quarter, ship, gear, haulno) %>%
   # only stations that are in the station table (north sea ibts)
   #  may be reduntant
-  filter(id %in% st$id) %>% 
+  filter(id %in% tidy_st$id) %>% 
   # length class to cm
   mutate(length = ifelse(lngtcode %in% c("1"), lngtclass, lngtclass / 10),
          hlnoatlngt = hlnoatlngt * subfactor) %>% 
   # get the data type and hauldur
-  left_join(st %>% select(id, datatype, hauldur)) %>% 
+  left_join(tidy_st %>% select(id, datatype, hauldur)) %>% 
   # catch per hour
   mutate(n = ifelse(datatype == "R",
                     hlnoatlngt * 60 / hauldur,
                     hlnoatlngt)) %>% 
   # join with latin name
   left_join(species_code) %>%
-  # select only needed columns
-  select(id, latin, sex, length, n) %>% 
-  tbl_df()
+  # summarise for each length (basically ignore the sex)
+  group_by(id, latin, length) %>% 
+  summarise(n = sum(n))
 ```
 
 ### The age data
 
 ```{r, eval = FALSE}
 colnames(raw_ag) <- tolower(colnames(raw_ag))
-ag <- 
+tidy_ag <- 
   raw_ag %>% 
   unite(id, year, quarter, ship, gear, haulno) %>% 
   # turn everything to cm
@@ -285,6 +284,6 @@ ag <-
 ### Save stuff for later use
 
 ```{r, eval = FALSE}
-save(st, le, ag, species_code, ns_area, file = "data/nsibts_tidy.rda")
+save(tidy_st, tidy_le, tidy_ag, species_code, ns_area, file = "data/nsibts_tidy.rda")
 ```
 

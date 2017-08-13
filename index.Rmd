@@ -63,7 +63,7 @@ ___
 
 #### Day 3 - Wednesday
 
-* [Case example](pre_grammar2.html)
+* [Case example](pre_grammar.html)
 * [Statistic in R](pre_statistics.html)
 * [Plotting spatial data](pre_ggplot10.html)
 
@@ -81,6 +81,7 @@ ___
 ### Bits and pieces
 ___
 
+#### [Tidying DATRAS](p_tidydatras.html)
 
 #### [Generating a package](b_packages.html)
 
