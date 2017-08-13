@@ -264,7 +264,8 @@ tidy_le <-
   left_join(species_code) %>%
   # summarise for each length (basically ignore the sex)
   group_by(id, latin, length) %>% 
-  summarise(n = sum(n))
+  summarise(n = sum(n)) %>% 
+  ungroup()
 ```
 
 ### The age data

@@ -60,28 +60,29 @@ ___
 * [Getting started with ggplot](pre_ggplot.html)
 * [Getting started with dplyr](pre_dplyr.html)
 * [Working with dates](pre_dates.html)
+* [Relational data](pre_joins.html)
 
 #### Day 3 - Wednesday
 
-* [Case example](pre_grammar.html)
+* [Case example - DATRAS](pre_grammar.html)
 * [Statistic in R](pre_statistics.html)
 * [Plotting spatial data](pre_ggplot10.html)
+* [Case example](pre_grammar2.html), continued ...
 
 #### Day 4 - Thursday
 
-* [Case example](pre_grammar2.html), continued ...
 * Applied projects
+    - Select any of the example projects
+    - Work on your own data
+* [The fundamentals of functions and package writing]
 
 #### Day 5 - Friday
 
 * Applied projects, continued ...
-* The fundamentals of functions and package writing
 * Introduction to version control (git) and social coding (www.github.com)
 
 ### Bits and pieces
 ___
-
-#### [Tidying DATRAS](p_tidydatras.html)
 
 #### [Generating a package](b_packages.html)
 
@@ -90,6 +91,8 @@ ___
 #### [dplyr and databases](b_databases.html)
 
 #### [Accessing fishbase data](b_fishbase.html)
+
+#### [Tidying DATRAS](p_tidydatras.html)
 
 #### ...
 
@@ -100,7 +103,7 @@ ___
 
 #### [Logbook data](prj_log.html)
 
-* **TODO**: Revamp or drop
+**TODO**: Revamp or drop
 
 #### [Viewing stock summary statistics](prj_ss.html)
 
