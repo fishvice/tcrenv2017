@@ -262,10 +262,9 @@ tidy_le <-
                     hlnoatlngt)) %>% 
   # join with latin name
   left_join(species_code) %>%
-  # summarise for each length (basically ignore the sex)
-  group_by(id, latin, length) %>% 
-  summarise(n = sum(n)) %>% 
-  ungroup()
+  ungroup() %>% 
+  # only needed columns, rest are redundant
+  select(id, latin, length, sex, n)
 ```
 
 ### The age data

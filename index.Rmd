@@ -51,28 +51,28 @@ ___
 
 #### Day 1 - Monday
 
-* [Introduction](pre_intro.html)
-* [Reproducible research with R](pre_markdown.html)
-* [Getting data into R](pre_data.html)
+* [Introduction](pre_intro.html) - eh
+* [Reproducible research with R](pre_markdown.html) - bte
+* [Getting data into R](pre_data.html) - bte
+* [Getting started with ggplot](pre_ggplot.html) - eh
 
 #### Day 2 - Tuesday
 
-* [Getting started with ggplot](pre_ggplot.html)
-* [Getting started with dplyr](pre_dplyr.html)
-* [Working with dates](pre_dates.html)
-* [Relational data](pre_joins.html)
+* [Getting started with dplyr](pre_dplyr.html) - bte
+* [Working with dates](pre_dates.html) - eh
+* [Case example - DATRAS](pre_grammar.html) - eh
 
 #### Day 3 - Wednesday
 
-* [Case example - DATRAS](pre_grammar.html)
-* [Statistic in R](pre_statistics.html)
-* [Plotting spatial data](pre_ggplot10.html)
-* [Case example](pre_grammar2.html), continued ...
+* [Relational data](pre_joins.html) - eh/bth
+* [Statistic in R](pre_statistics.html) - bte
+* [Plotting spatial data](pre_ggplot10.html) - eh
+* [Case example - DATRAS](pre_grammar2.html), continued ... - eh
 
 #### Day 4 - Thursday
 
 * Applied projects
-    - Select any of the example projects
+    - Select any of the example projects - think we need more
     - Work on your own data
 * [The fundamentals of functions and package writing]
 
@@ -92,7 +92,7 @@ ___
 
 #### [Accessing fishbase data](b_fishbase.html)
 
-#### [Tidying DATRAS](p_tidydatras.html)
+#### [Tidying DATRAS](p_tidydatras.html) - could be moved to projects
 
 #### ...
 
