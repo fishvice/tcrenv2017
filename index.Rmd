@@ -60,14 +60,14 @@ ___
 
 * [Getting started with dplyr](pre_dplyr.html) - bte
 * [Working with dates](pre_dates.html) - eh
-* [Case example - DATRAS](pre_grammar.html) - eh
+* [Case example - DATRAS](pre_case.html) - eh
 
 #### Day 3 - Wednesday
 
 * [Relational data](pre_joins.html) - eh/bth
 * [Statistic in R](pre_statistics.html) - bte
 * [Plotting spatial data](pre_ggplot10.html) - eh
-* [Case example - DATRAS](pre_grammar2.html), continued ... - eh
+* [Case example - DATRAS](pre_case.html), continued ... - eh
 
 #### Day 4 - Thursday
 
