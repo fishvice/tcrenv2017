@@ -15,11 +15,23 @@ knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE)
 ```
 
+# Preamble
+
+Load the required packages
 ```{r}
 library(tidyverse)
 library(haven)
 library(readxl)
 ```
+
+Get the datasets and place the datasets in a folder called "data"
+```{r,eval=FALSE}
+dir.create('data')
+download.file("http://www.hafro.is/~einarhj/data/minke.csv",destfile = 'data/minke.csv')
+download.file("http://www.hafro.is/~einarhj/data/example_excel.xlsx",destfile = 'data/example_excel.xlsx')
+```
+
+
 
 ## Sources of data 
 
@@ -54,6 +66,26 @@ dat <- edit(dat)
 
 but this only creates variable in R that, unless saved, will disappear when R is closed.
 
+### Saving R objects
+
+R has a special file format for saving R objects, such as data frames, called Rdata files. To save an object to a file you can:
+
+```{r,eval=FALSE}
+save(minke,file='minke.Rdata')
+```
+
+where R saves the minke data frame to a file called 'minke.Rdata'. You can any number of objects to a file:
+
+```{r,eval=FALSE}
+save(minke,length, weight, file = 'someData.Rdata')
+```
+
+If you want to save everything in your workspace you can also do:
+```{r}
+save.image(file='everything.Rdata')
+```
+
+
 # Text files
 
 Text files are the most basic types of data files and commonly used in all data exchange. Most of the data that we are interested in is in some sort of tabular form and whole host of functions are available to import these files into R. These include the following functions from the readr package which are included in the tidyverse package:
@@ -75,7 +107,7 @@ read_function(file,           ## location of the data file
               n_max=Inf)      ## maximum number of lines to read in
 ```
 
-But for the most common cases only the file location is needed, which means if your data file is situated in your working directory this is just the name of the file:
+Note that `read_function` is a placeholder name for any of the `read_*` functions. For the most common cases only the file location is needed, which means if your data file is situated in your working directory this is just the name of the file:
 
 ```{r,eval=FALSE}
 d <- read_function('nameOfFile.txt')
@@ -129,6 +161,10 @@ minke <-
 
 
 #### Excercise
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 * How would you import data where the column separator is "|"
 * You current working directory is "~/Documents/workdir1/" and you want to read a file named "data.csv" in "~/Documents/datadir/". Can you think of two ways to write the file path?
 * How would you read in this file:
@@ -139,6 +175,9 @@ col1 col2 col3
 3 4 b
 5 6 c
 ```
+
+</div>
+</div>
 
 ### Useful sanity checks 
 
@@ -153,9 +192,7 @@ When importing data into R it is fairly useful to have the following in mind
 * Are the numbers correctly entered?
 * Are there any items that can cause misunderstanding?
 
-Any of these points can cause trouble when importing the data, in particular when the data has been prepared using Excel.
-
-After importing is often useful to run a couple of tests on the data to ensure you have read the data in correctly:
+Any of these points can cause trouble when importing the data, in particular when the data has been prepared using Excel. Notably automatic date conversions in Excel is frequently the culprit for many data import issues. After importing is often useful to run a couple of tests on the data to ensure you have read the data in correctly:
 
 The first six rows:
 ```{r}
@@ -188,68 +225,159 @@ glimpse(minke)
 ```
 
 #### Excercise
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+
 * What is wrong with this file
 ```
-a  b  c 
-1  1  bla bla
-2  2  bingo
+a,b,c 
+1,1,bla,bla
+2,2,bingo
 ```
+
+* What went wrong with the import?
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+tmp <- read_table('data/minke.csv')
+head(tmp)
+```
+
+</div>
+</div>
+
 
 ### Exporting data
 
-R can also export data into formats readable by other software
+R can also export data into formats readable by other software. Among these are:
 ```{r,eval=FALSE}
 write_csv   # write a comma separated file
 write_delim # write a file with user defined delimiter
 write_tsv   # write a tab separated file
 write_excel_csv  # write a comma separated file for Excel
+write       # write a line to a file
 ```
 
 Most used inputs to these functions are the object to be exported and the file name with the desired location. To export the minke data set as a comma separated file you can simply do:
 
 ```{r,eval=FALSE}
-write_csv(minke,file='minke.csv')
+write_csv(minke,path = 'minke.csv')
 ```
 
 but with a bit more control
 ```{r,eval=FALSE}
 write_delim(minke,
-            file = 'minke-class.csv',  ## file name
+            path = 'minke-class.csv',  ## file name
             col_names = TRUE,          ## write header
             delim = ',')               ## specifiy the delimiter
 
 ```
 
-#### Exercise
-* 
+The `write_excel_csv` is nearly identical to `write_csv`, except it adds a hidden character at the top of the file that instructs Excel to read the file with "utf-8" (the universal character encoding).
 
-### Other useful functions
-
+You can write single lines to a file with the `write` function:
 ```{r,eval=FALSE}
-scan
-read_lines
-write
+write('Here is some text',file='Afile.txt')
 ```
 
+But this becomes more useful when appending the text to an existing file:
+```{r,eval=FALSE}
+write('# comment describing the data', file = 'dataFile.csv')
+write_csv(minke,path = 'dataFile.csv', append = TRUE, col_names = TRUE)
+write('# other comment at the bottom', file = 'dataFile.csv',append = TRUE)
+
+```
+
+Be careful with append, if not properly set the file can be overwritten.
+
+#### Exercise
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+
+</div>
+</div>
 
 
 # Excel
 
-### Import Excel files
-
+### Importing Excel files
+With the readxl package we can read Excel files directly into R with the `read_excel` function:
 ```{r,eval=FALSE}
+d <- read_excel(path,               # Path to the excel file
+                sheet = NULL,       # What sheet should be read (either name or number)
+                range = NULL,       # What cells should be read   
+                skip = 0,           # how many lines a the top should be skipped
+                col_names = TRUE,   # is the first line 
+                col_types = 'guess')# what is the type of data in the column
 
-
-minke.xls <- read_excel("minke.xlsx")
-
-##read in only the fish data
-fish.xls <- read_excel('minkeandfish.xlsx',sheet = 'fish')
-
-##list sheets
-excel_sheets('minkeandfish.xlsx')
 ```
 
-### Export excel files
+
+
+
+In the simplest of cases where the data is well formed we can simply read the data in 
+```{r}
+icod_summary <- read_excel("data/example_excel.xlsx")
+icod_summary
+```
+
+You can also list the sheets in the Excel file
+
+```{r}
+excel_sheets('data/example_excel.xlsx')
+```
+So if the data is in a specific sheet we can specifiy the sheet directly by name or number:
+
+```{r,eval=FALSE}
+# by order
+read_excel("data/example_excel.xlsx", sheet = 1) 
+# by name
+read_excel("data/example_excel.xlsx", sheet = 'iCod_summary') 
+
+```
+Excel file are notoriously free form so often data are mingled in with comments and colors. We can specify the columns and rows where the data are located within the sheet explicity with the range setting of `read_excel`:
+
+```{r}
+d <- read_excel('data/example_excel.xlsx',range = 'A1:D6')
+d
+```
+
+And you can even specify the sheet in the range Excel-style:
+```{r,eval=FALSE}
+d <- read_excel('data/example_excel.xlsx',range = 'iCod_summary!A1:D6')
+```
+
+The `readxl` package provides also a couple of helper functions when specifing the range:
+
+```{r,eval=FALSE}
+anchored      # anchor selction to a specific cell
+cell_cols     # read selected columns
+cell_rows     # read selected roww
+cell_limits   # read selected columns and rows
+```
+
+So you can ask for only the 3rd and the 4th column:
+```{r}
+read_excel('data/example_excel.xlsx',range = cell_cols(3:4))
+```
+
+
+
+
+#### Exercise
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+* In the 
+
+</div>
+</div>
+
+
+### Exporting to excel
 
 ```{r,eval=FALSE}
 library(openxlsx)
@@ -260,6 +388,44 @@ write.xlsx(list("minke"=minke,'fish'=fish),file='minkeandfish.xlsx')
 
 
 # Other statistical software
+
+Data is often stored in format created by other statistical software packages such a SPSS and SAS. The haven package provides the necessary functions to import and export to these file formats:
+
+```{r,eval=FALSE}
+# SAS
+read_sas    # read sas file
+write_sas   # write sas file
+# SPSS
+read_sav    # read spss file
+write_sav   # write spss file
+
+# Stata
+read_dta    # read stata file
+write_dta   # write stata file
+```
+
+There are a number of SPSS/SAS/Stata features that have no direct equivalent in R. Haven preserves them so you can choose what do with them. To simply eliminate them, use one of the zap functions:
+
+```{r,eval=FALSE}
+as_factor     # Convert input to a factor.
+labelled_spss # Labelled vectors for SPSS
+labelled      # Create a labelled vector.
+is.labelled   # -><- 
+print_labels  # Print the labels of a labelled vector
+
+tagged_na        # "Tagged" missing values
+na_tag  
+is_tagged_na 
+format_tagged_na 
+print_tagged_na
+
+zap_empty     # Convert empty strings into missing values.
+zap_formats   # Remove format attributes
+zap_labels    # Zap labels
+zap_missing   # Zap special missings to regular R missings
+zap_widths    # Remove display width attributes
+```
+
 
 # Database connectivity
 
@@ -291,19 +457,18 @@ num.minke <-
 ```
 
 
-describe the table (analogous to str in R)
+Describe the table
 ```{r,eval=FALSE}
 tbl_vars(minke.tbl)
 glimpse(minke.tbl)
 ```
 
-list all tables in a data base
+List all tables in a data base
 ```{r,eval=FALSE}
 db_list_tables(db$con)
 ```
 
-for more db stuff refer to
-?db_list_tables
+for more db stuff refer to the help page for `db_list_tables`
 
 
 # Other data sources
@@ -311,3 +476,8 @@ for more db stuff refer to
 ## Class project
 Try to open a file from "home"
 
+
+# Further readings
+
+* http://r4ds.had.co.nz/data-import.html
+* http://readxl.tidyverse.org/
