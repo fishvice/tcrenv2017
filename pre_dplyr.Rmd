@@ -20,26 +20,23 @@ knitr::opts_chunk$set(warning = FALSE,
 knitr::opts_chunk$set(out.width='750px', dpi=200)
 ```
 
-# Today
-
 ![](img/data_science.png)
 
 
 # Preamble
 
-### Needed libraries for this tutorial:
+#### Needed libraries for this tutorial:
 ```{r, message = FALSE, warning = FALSE, results='hide'}
 library(tidyverse)
 ```
 
 #### Getting example data into R
 ```{r}
-d <- read.csv("http://www.hafro.is/~einarhj/data/minke.csv",
-              stringsAsFactors = FALSE)
-str(d)
+d <- read_csv("http://www.hafro.is/~einarhj/data/minke.csv")
+glimpse(d)
 ```
 
-## Reading material 
+### Reading material 
 
 * http://r4ds.had.co.nz/
 * https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf
@@ -66,8 +63,8 @@ Commonly, when collating summaries by group, one wants to:
 
 For example, one might want to
 
-* fit the same model to different rivers
-* quickly calculate summary statistics for by bait type
+* fit the same model to different species
+* quickly calculate summary statistics for by gear type
 * perform group-wise transformations like scaling or standardizing
 
 ## dplyr
@@ -97,18 +94,20 @@ img <- readPNG("img/filter.png")
 grid.raster(img)
 ```
 
-When selecting rows from a data.frame there are two ways to One can create a subset of the data using the `filter` command:
+When selecting rows from a data.frame there are two ways, filter according to a certain criterion or find specific rows. You can create a subset of the data using the `filter` command:
 ```{r}
+## find all whales caught in 2005
 d.2005 <-
   filter(d,year == 2005)
-head(d.2005)
+d.2005
 ```
 
 and filter even further:
 ```{r}
+## find all whales caught in 2005 in the Southern area
 d.2005.south <-
-  filter(d,year == 2005, area == 'south')
-head(d.2005.south)
+  filter(d,year == 2005, area == 'South')
+d.2005.south
 ```
 
 Filter can use any logical statement:
@@ -156,11 +155,17 @@ This can of course be accomplished with the base R `[]` operator:
 d[c(1,4:6,100),]
 ```
 
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
 
-
-### example
 * Find all minke whales caught that did not have a maturity status
 * Find all males caught in the northern area in 2006 and 2007
+
+</div>
+</div>
+
+### Selecting columns
 
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/select.png")
@@ -168,21 +173,21 @@ grid.raster(img)
 ```
 
 
-Take only certain columns 
+The `select` functions allows you to ask for certains columns:
 ```{r}
 d.redux <- 
   select(d,id,year,maturity)
-head(d.redux)
+d.redux
 ```
 
-select all columns except `area`:
+You can also omit certain columns using negative indexing: for example you can select all columns except `area`:
 ```{r}
 d.nar <- 
   select(d,-area)
-head(d.nar)
+d.nar
 ```
 
-Other useful helper function
+The `select` function can use a couple of fairly useful helper function:
 
 ```{r,eval=FALSE}
 starts_with('stomach')  ## Finds all columns that start with "stomach"
@@ -196,30 +201,37 @@ And you can of course combine these at will:
 ```{r}
 d.redux <- 
   select(d,id:lat,starts_with('stomach'))
-
+d.redux
 ```
 
 
-Select also allows you to rename columns as you select them:
+`select` also allows you to rename columns as you select them:
 ```{r}
 d.redux <- 
   select(d,id,date.caught=date)
-head(d.redux)
+d.redux
 ```
 
-but this only selects the requested columns. If you just want to rename the columns in the data.frame you can use the function `rename`:
+but this only selects the requested columns. If you just want to rename a couple of columns in the data frame leaving the other columns intact you can use the function `rename`:
 
 ```{r}
 d.ren <- 
   rename(d,date.caught=date)
-head(d.ren)
+d.ren
 ```
 
 
-### Excercise
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 * Select age, length and id from the minke dataset, and rename id to "whale_id"
 * Select the weight columns using the `contains` function
 
+</div>
+</div>
+
+### Arranging rows
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/arrange.png")
 grid.raster(img)
@@ -246,7 +258,7 @@ head(d.arr2)
 
 
 
-
+### Adding columns to data frames
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/mutate.png")
 grid.raster(img)
@@ -278,10 +290,18 @@ d.wapp <-
 head(d.wapp)
 ```
 
-### Excercise
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 * Add a column to the minke whale dataset where Fullton's condition factor, $K=100.000(W/L^3)$, is calculated 
   + Plot a histogram
 
+</div>
+</div>
+
+
+### Summarising data frames
 
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/summarise.png")
@@ -318,10 +338,18 @@ d.summ2
 ```
 
 
-## Exercise
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 * How many females were caught in the Northern area
 * Calculate the mean stomach volume and standard deviation of all whales caught
 
+</div>
+</div>
+
+
+### Split data frame rows by columns
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/group_summarise.png")
 grid.raster(img)
@@ -351,16 +379,27 @@ vital.stats
 
 
 # Reshape verbs
+
+When importing data the bulk of our time goes into cleaning data in order for it be useful for further analysis. Here the guiding principle is to describe tools that allow you to transform "messy" datasets to a "tidy" dataset. A "tidy" dataset is of the form:
+
+1. Each variable forms a column.
+2. Each observation forms a row.
+3. Each type of observational unit forms a table.
+
+The `tidyr` package allows you to do many of the commonly post import data tidying jobs with relative ease. The main functions of the package include:
+
 * **gather**: Gather columns into rows
 * **spread**: Spread rows into columns
 * **separate**: Separate one column into many
 * **unite**: Unite several columns into one
+
+### Wide to long format
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/gather.png")
 grid.raster(img)
 ```
 
-Often data are arranged in a wide format, which is more readable to humans. For computations is often more appropriate to store the data in a long format. 
+Often data are arranged in a wide format, e.g measurements from different years are placed in the same row with columns indicating the year. The wide format is more readable to humans but for computations is often more appropriate to store the data in a long format. 
 ```{r}
 vital.long <- 
   gather(vital.stats,statistic,value,c(num_whales,num_years))
@@ -374,6 +413,8 @@ You can also use negative indexing indicating that those columns should remain i
 gather(vital.stats,statistic, value, -maturity)
 ```
 
+
+### Long to wide format
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/spread.png")
 grid.raster(img)
@@ -388,36 +429,46 @@ d.sp <- spread(d.summ,year,n)
 d.sp
 ```
 
-### Excercise 
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 * Calculate how many whales where caught by year and area
 * Spread the data such that the columns represent area and rows years.
 
+</div>
+</div>
+
+
+### Splitting columns
 
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/separate.png")
 grid.raster(img)
 ```
 
-`separate` takes a column and splits it up by pattern:
+Often data is stored in a single column when they really should be stored in two or more columns. The `separate` function allows you to take a column and split it up by pattern:
 ```{r}
+## separate the date column into year, month, day, hour, minute and second
 d.sep <- 
   separate(d,date,c('y','m','d','h','m','s'))
-head(d.sep)
+d.sep
 ```
 
-Separate looks for all possible dividers (i.e. non alphanumeric characters) and uses those to divide the column. One must therefore be careful to specify the new columns correctly.
+The `separate` function looks for all possible dividers (i.e. non alphanumeric characters) and uses those to divide the column. One must therefore be careful to specify the new columns correctly.
 
 You can also specify the separation symbol explicitly:
 
 ```{r}
 d.sep <- 
   separate(d,date,c('date','time_of_day'),sep=' ')
-head(d.sep)
+d.sep
 
 ```
 
 
 
+### Uniting columns
 
 ```{r,width=150,echo=FALSE}
 img <- readPNG("img/unite.png")
@@ -425,11 +476,11 @@ grid.raster(img)
 ```
 
 
-`unite` is the opposite of `separate`
+Sometimes it is useful, i.e. for presentational purposes, to combine one or more columns into a single column. The `unite` function allows this and is the opposite of `separate`
 ```{r}
 d.united <- 
   unite(d,ns_year,c(area,year), sep = ' - ')
-head(d.united)
+d.united
 ```
 
 
@@ -445,11 +496,11 @@ d.summ
 
 All this quickly becomes cumbersome and hard to read, for example what does this do?
 
-```{r}
+```{r,eval=FALSE}
 spread(summarise(group_by(d,sex,year),n=n()),sex,n)
 ```
 
-## The `%>%` operator
+### The `%>%` operator
 
 dplyr allows chaining of operators using the $\%>\%$ operator
 
@@ -476,7 +527,11 @@ d %>%
 ```
 The above can be read as "take data d, then split into groups by sex and year, then calculate the mean and standard deviation of length and K for each group, then arrange by year".
 
-## Excercise
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 
 * How do you produce this table:
 ```{r,echo=FALSE}
@@ -489,6 +544,21 @@ d %>%
   spread(sex,n)
 ```
 
+</div>
+</div>
+
+
+# Class excercise
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+Using your own data:
+
+* Transform your data to a "tidy" format
+* Identify factors that are of interest and produce summaries of key variables 
+
+</div>
+</div>
 
 
 

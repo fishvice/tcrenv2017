@@ -22,6 +22,7 @@ Load the required packages
 library(tidyverse)
 library(haven)
 library(readxl)
+library(openxlsx)
 ```
 
 Get the datasets and place the datasets in a folder called "data"
@@ -71,13 +72,13 @@ but this only creates variable in R that, unless saved, will disappear when R is
 R has a special file format for saving R objects, such as data frames, called Rdata files. To save an object to a file you can:
 
 ```{r,eval=FALSE}
-save(minke,file='minke.Rdata')
+save(d,file='d.Rdata')
 ```
 
-where R saves the minke data frame to a file called 'minke.Rdata'. You can any number of objects to a file:
+where R saves the d data frame to a file called 'd.Rdata'. You can any number of objects to a file:
 
 ```{r,eval=FALSE}
-save(minke,length, weight, file = 'someData.Rdata')
+save(d,length, weight, file = 'someData.Rdata')
 ```
 
 If you want to save everything in your workspace you can also do:
@@ -88,7 +89,7 @@ save.image(file='everything.Rdata')
 
 # Text files
 
-Text files are the most basic types of data files and commonly used in all data exchange. Most of the data that we are interested in is in some sort of tabular form and whole host of functions are available to import these files into R. These include the following functions from the readr package which are included in the tidyverse package:
+Text files are the most basic types of data files and commonly used in all data exchange. Most of the data that we are interested in is in some sort of tabular form and whole host of functions are available to import these files into R. These include the following functions from the `readr` package, included in the `tidyverse` package:
 
 ```{r,eval=FALSE}
 read_csv  ## read comma separated files where the decimal is denoted as '.'
@@ -160,7 +161,7 @@ minke <-
 ```
 
 
-#### Excercise
+
 <div class="panel panel-warning">
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">
@@ -224,7 +225,7 @@ Structure of the data
 glimpse(minke)
 ```
 
-#### Excercise
+
 <div class="panel panel-warning">
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">
@@ -290,15 +291,6 @@ write('# other comment at the bottom', file = 'dataFile.csv',append = TRUE)
 
 Be careful with append, if not properly set the file can be overwritten.
 
-#### Exercise
-<div class="panel panel-warning">
-<div class="panel-heading">Exercise</div>
-<div class="panel-body">
-
-
-</div>
-</div>
-
 
 # Excel
 
@@ -363,15 +355,27 @@ So you can ask for only the 3rd and the 4th column:
 read_excel('data/example_excel.xlsx',range = cell_cols(3:4))
 ```
 
+When importing you can also explicitly define how the columns in your data will be determined using the col_types argument:
+```{r}
+read_excel('data/example_excel.xlsx',col_types = c('text','numeric','numeric','numeric','numeric','numeric','numeric'))
+```
 
+Available column types are: 
 
+guess | numeric
+----- | -------
+text  | logical
+date  | list
+skip  | -
 
-#### Exercise
+Note that when the data in the cells can't be coerced in the the desired format the cell contents will be replace with `NA`-s.
+
 <div class="panel panel-warning">
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">
 
-* In the 
+* Use the range attribute to import the tabular data from 'Nobob' sheet in the example_exel file
+* Can you think of a way to ensure that the column are imported as numbers?
 
 </div>
 </div>
@@ -379,11 +383,15 @@ read_excel('data/example_excel.xlsx',range = cell_cols(3:4))
 
 ### Exporting to excel
 
+Another package, `openxlsx`, provides tools to export data to an Excel format. To export a single data frame you can simply write:
+
 ```{r,eval=FALSE}
-library(openxlsx)
 write.xlsx(minke,file='minke.xlsx')
-fish <- read.csv2('lec1/fish.csv')
-write.xlsx(list("minke"=minke,'fish'=fish),file='minkeandfish.xlsx')
+```
+
+If you need to export more that one data frame you can use a named list:
+```{r,eval=FALSE}
+write.xlsx(list(minke=minke,iCod=icod_summary),file='RtoExcel.xlsx')
 ```
 
 
@@ -430,51 +438,59 @@ zap_widths    # Remove display width attributes
 # Database connectivity
 
 Databases are commonly used to store (large amounts of) data and numerous software vendors provide database solutions, both general and specific
-Similarly numerous packages exist to interact with databases in R. Notably DBI, RODBC and dplyr
+Similarly numerous packages exist to interact with databases in R. Notably DBI, RODBC and dplyr.
 Typically in an R session the user queries the database for the data needed for a particular analysis and loads it into memory. Larger datasets, that don’t fit into memory will need to be subsampled
 
-
-setup a connection to a database
-by creating it
-```{r,eval=FALSE}
+To illustrate how the database connectivity works we will set up a dummy sqlite database containing the minke dataset. The following command creates and sets up a link to a dummy database
+```{r}
 db <- src_sqlite('minke.db',create = TRUE)
 ```
 
-dump data into it
-```{r,eval=FALSE}
+It is fairly straightforward to add data to the database. Here the minke whale data is copied to a table called `minke_tbl`
+```{r}
 tmp <- copy_to(db,minke,'minke_tbl')
 ```
 
-query the database
-```{r,eval=FALSE}
+We can query the database in many ways. If we want everything from the table we use the `tbl` command:
+```{r}
 minke.tbl <- tbl(db,'minke_tbl')
+minke.tbl
 ```
 
-run sql on the database
-```{r,eval=FALSE}
+You can also run arbitrary sql commands:
+```{r}
 num.minke <- 
   tbl(db,sql('select count(1) from minke_tbl'))
+num.minke
 ```
 
 
 Describe the table
-```{r,eval=FALSE}
+```{r}
 tbl_vars(minke.tbl)
 glimpse(minke.tbl)
 ```
 
-List all tables in a data base
-```{r,eval=FALSE}
+List all tables in a database
+```{r
 db_list_tables(db$con)
 ```
 
-for more db stuff refer to the help page for `db_list_tables`
+For information related to database connectivity refer to:
+* https://db.rstudio.com/dplyr/
 
 
-# Other data sources
 
-## Class project
+# Class excercise
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 Try to open a file from "home"
+
+</div>
+</div>
 
 
 # Further readings

@@ -26,6 +26,7 @@ library(tidyverse)
 library(lsmeans)
 library(broom)
 library(lubridate)
+library(modelr)
 ```
 
 ### Getting example data into R
@@ -39,9 +40,10 @@ and do a bit of data processing:
 
 ```{r}
 d <- 
-  ag %>% 
-  filter(latin == 'Gadus morhua', !is.na(wgt)) %>% 
-  left_join(st)
+  tidy_ag %>% 
+  filter(latin == 'Gadus morhua', !is.na(wgt),!is.na(age)) %>% 
+  left_join(tidy_st) %>% 
+  filter(!is.na(depth))
 ```
 
 
@@ -66,29 +68,108 @@ Here it is assumed that the course participants are familiar with basic concepts
 
 # Linear regression
 
-In linear regression we want to estimate the best line through a cloud of points:
+When fitting statistical models the aim is to "tweak" model settings until they can "mimic" the data optimally. In the case of linear regression we want to estimate the best line through a cloud of points:
 ```{r,echo=FALSE}
-data_frame(x=1:100/10,y=x + rnorm(100,sd=1)) %>% 
+dat <- data_frame(x=1:100/10,y=x + rnorm(100,sd=1)) 
+dat %>% 
   ggplot(aes(x,y)) + geom_point()
 ```
 
 
 The best line is the one that minimizes the difference between the data and the (model) predictions. Typically the model is of the form:
 $$ y = \alpha + \beta x + \ldots $$
+we want to choose parameters $\alpha$, $\beta$ and others such that this distance is minimized:
 
-And typically the inferences we are interested in are of the form:
+```{r,echo=FALSE}
+dat %>% mutate(yhat = 2*x-5) %>% ggplot(aes(x,y)) + geom_point() + geom_line(aes(y=yhat)) + geom_segment(aes(xend=x,yend=yhat),col='blue') + annotate(x=1,y=10,label='a=-5,b=2',geom='label')
+```
+We can of course try a number of values for $\alpha$ and $\beta$ but essentially we want to minimize the total lengths of the "blue bars" in the figure above. Mathematially speaking this is done by minimizing the following sum:
+
+$$ l = \sum_i \big(y_i - (\alpha + \beta x + \ldots)\big)^2$$
+and by varying the $\alpha$-s and $\beta$-s systematically we can dervive the optimum solution. 
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+library(viridis)
+sim1_dist <- function(a,b){
+  sum((dat$y-(a+b*dat$x))^2)
+}
+
+grid <- expand.grid(
+  a1 = seq(-10, 10, length = 25),
+  a2 = seq(-1, 2, length = 25)
+  ) %>% 
+  mutate(dist = purrr::map2_dbl(a1, a2, sim1_dist))
+
+grid %>% 
+  ggplot(aes(a1, a2)) +
+  geom_point(data = filter(grid, rank(dist) <= 10), size = 4, colour = "red") +
+  geom_point(aes(colour = -dist)) + 
+  scale_color_viridis() +
+  labs(x=expression(alpha),y=expression(beta))
+
+```
+
+The figure above illustrates the value of $l$, i.e. distance metric, as a function of $\alpha$ and $\beta$. From the figure we see that the minimum is obtained close to $\alpha = 0$ and $\beta = 1$ and that the estimates of $\alpha$ and $\beta$ are negatively correlated. 
+
+In addition to finding the optimal values of $\alpha$ and $\beta$ we want to know if these values are significantly different from zero. In mathematical terms we want to draw  inferences of the form:
 $$H_0 : \qquad \beta = 0 $$
 vs.
-$$H_1 : \qquat \beta \neq 0 $$
-Note that linear regression is essentially just an extension of the ANOVA that is that it further allows numerical variable to be part of the testing process. 
+$$H_1 : \qquad \beta \neq 0 $$
+### Linear models in R
 
-Regression in R is done using the `lm` function:
+R provides a suite of tools for model building. One of the simplest types of models, linear regression models, are created using the `lm` function:
+```{r}
+fit <- lm(y~x, data=dat)
+fit
+```
+where `y~x` is the formula to which parameter should be estimated, `y` is the dependent variable and `x` is explanatory variable and the `~` indicates that the variable `x` should be used to explain `y`. Formulas calls on columns from the data and can be composed of number of components:
+
 ```{r,eval=FALSE}
-lm(y~x, data=dat)
++       ## add variables to the formula
+-       ## remove variable
+:       ## interaction, written x:y
+*       ## x*y is a shorthand for x + y + x:y
+/       ## x/y is a shorthand for x + x:y
+|       ## x|y is x conditioned on the values of y
+I()     ## include a new variable based on the calculations within the parenthesis
+-1      ## no intercept term
 ```
 
 
-Now as an example consider the length weight relationship:
+The `lm` function the estimates the coefficients of the formula, and note that `lm` assumes that an intercept ($\alpha$) is estimated as well as the slope ($\beta$). To investigate if the values are significantly different from zero we can use the `summary` function:
+```{r}
+summary(fit)
+```
+
+The output from the `summary` function shows the key statistics from a model. The model coefficients are tabulated along with standard error estimates and p-values. To extract these numbers expliticly as a data frame the `broom` package provides a nice function called `tidy`:
+```{r}
+tidy(fit)
+```
+and the confidence intervals can be calculated as:
+```{r}
+tidy(fit,conf.int = TRUE)
+```
+
+
+
+And to plot the prediction and residuals the `modelr` package has two functions, `add_predictions` and `add_residuals`:
+```{r,out.width = "50%",fig.show = "hold",warning=FALSE,message=FALSE}
+aug.dat <- 
+  dat %>% 
+  add_predictions(fit) %>% 
+  add_residuals(fit) 
+## plot predictions
+aug.dat %>%   
+  ggplot(aes(x,y)) + geom_point() + geom_line(aes(y=pred),col='blue')
+## plot residuals
+aug.dat %>% 
+  ggplot(aes(resid)) + geom_histogram()
+```
+
+
+
+### Fitting length--weight
+Now as a real example consider the length--weight relationship for cod:
 ```{r}
 ggplot(d,aes(length,wgt,col=sex)) + geom_point()
 ```
@@ -98,66 +179,117 @@ we see that the relationship between length and weight is probably not linear bu
 fit <- lm(wgt~length,data=d)
 fit
 ```
-hmm fish a 0 cm is -2.4 kg. That is not really plausible. But look at the usual summaries:
+hmm fish a 0 cm is -2.4 kg:) That is not really plausible. But look at the usual summaries:
 ```{r}
 summary(fit)
 ```
+Everything is highly significant, as you would expect with this wealth of data, but looking at the fit to the data and residual:
 
-But let's do something more realistic and log transform the data:
+```{r, echo=FALSE,out.width = "50%",fig.show = "hold",warning=FALSE,message=FALSE}
+aug.dat <- 
+  d %>% 
+  add_predictions(fit) %>% 
+  add_residuals(fit) 
+## plot predictions
+aug.dat %>%   
+  ggplot(aes(length,wgt)) + geom_point() + geom_line(aes(y=pred),col='blue')
+## plot residuals
+aug.dat %>% 
+  ggplot(aes(resid)) + geom_histogram()
+```
+
+we see immediately that the model does not perform well on the tails and the residual error is heavily skewed. So let's do something more realistic and log transform the data:
 ```{r}
-fit <- lm(log10(wgt)~log10(length),data=d)
+fit <- lm(log(wgt)~log(length),data=d)
 fit
 ```
 
 This looks more sensible. Now lets plot the results:
 ```{r}
-fit %>% 
-  augment() %>%
-  mutate(length = 10^log10.length.,
-         wgt = 10^.fitted) %>% 
-  ggplot(aes(length,wgt)) + geom_point(data=d) + geom_line()
+aug.dat <- 
+  d %>% 
+  add_predictions(fit) %>% 
+  add_residuals(fit) 
+## plot predictions, note we need transform predictions back to non-log space
+aug.dat %>%   
+  ggplot(aes(length,wgt)) + geom_point() + geom_line(aes(y=exp(pred)),col='blue')
+## plot residuals
+aug.dat %>% 
+  ggplot(aes(resid)) + geom_histogram()
 ```
 
-One can the add variable to the regression by adding to the formula:
+We can then add variable to the regression by adding to the formula:
 ```{r}
-fit2 <- lm(log10(wgt)~log10(length)+sex,data=d)
+fit2 <- lm(log(wgt)~log(length)+sex,data=d)
 summary(fit2)
 ```
 
-#### Exercise
+and we can also add interaction terms, where the `log10(length)*sex` is a shorthand notation for `log10(length) + sex + log10(length):sex`:
+```{r}
+fit3 <- lm(log(wgt)~log(length)*sex,data=d)
+summary(fit3)
+```
 
-* Check if there is a significant interaction effect between sex and length in the weight
+
+
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+Using the model for length and weight for cod
+
+* Try adding more variables to see if they are signifcant
+
+
+</div>
+</div>
+
 
 
 ## Model fitting and diagnostics
-There is a whole host of different tools that are useful when building regression type models. If we want perform a stepwise model selection we can use the `step` function 
-```{r}
-step(fit2)
-```
 
-`step` iteratively applies `drop1` to the model until the AIC cannot be improved. Lets try a bigger model:
+There is a whole host of different tools that are useful when building regression type models. Typically when selecting what variables should be in the model some sort of model selection criterion is used. Commonly the Akaike Information Criterion (AIC) is used. The AIC is formulated as:
+
+$$AIC = 2k - 2ln(l) $$
+where $k$ is the number of parameters in the model and the $l$ is likelihood value, i.e. the distance metric. This essentially means that AIC punishes for every additional parameter so the improvement associated with the extra parameter must be that much greater. R has a built in function `AIC` that calulates the AIC which can be computed iteratively during the selection process. Now taking the most basic model (i.e. with only length) we can compute the AIC as:
+
+```{r}
+AIC(fit)
+```
+and compare with a larger model with the interaction term:
+```{r}
+AIC(fit3)
+```
+we see that the AIC score for the larger model is substantially lower, leading to the conclusion that the model with interaction is a better fit. 
+
+We often do this repeatedly starting from a large model and prune the number of variables in the model. To aid in this process R has a function called `drop1` that iteratively drops one model variable out of the fitting process and calculates the AIC score. Starting with a bigger model:
 
 ```{r}
 fit.full <- lm(log10(wgt)~log10(length)*sex + country + depth + 
-                 as.factor(year),
-               d)
-summary(fit.full)
+                 as.factor(year) + haulno + ship + age + hauldur,
+                d)
 ```
 
 Now do `drop1`:
 ```{r}
 drop1(fit.full)
 ```
-where we see that veidarfaeri is does not improve the fit. Let's select the minimal model:
+We see that models excluding either `ship` and `hauldur` have a higher AIC score and should therefore be remove, but only one at time. This is of course a bit of manual labour so R provides a function when we want perform a stepwise model selection, i.e the `step` function 
 ```{r}
 fit.reduced <- step(fit.full)
+fit.reduced
 ```
+
+`step` iteratively applies `drop1` to the model until the AIC cannot be improved. 
 
 Next we can plot some diagnostics:
 ```{r}
 plot(fit.reduced)
 ```
 
+# Generalised linear models
+In addiont
 
 # Non-linear regression
 Now say we want to fit a growth curve to our minke whale data
@@ -169,13 +301,10 @@ $$ l = L_{\infty}(1-e^{-k(a-t_0)})$$
 ggplot(minke,aes(age,length)) + geom_point() + theme_bw() + ylab('Length') + xlab('Age')
 ```
 
-What do we want to do exactly?
-
-* Again we want to find the best fitting curve through the datapoints, although now we want estimate a more arbitrary function
-* This means that we want to "draw" a line that minimized on average the distance to all data points, i.e. find x that solves
+What do we want to do exactly? Again we want to find the best fitting curve through the datapoints, although now we want estimate a more arbitrary function. This means that we want to "draw" a line that minimized on average the distance to all data points, i.e. find x that solves
 $$min_{x} \left(\sum_{i} (l_i - VonB(\textbf{x},a(i)))^2\right)$$
 
-* In the Von B function there are three parameters, $L_\infty$, $k$ and $t_0$ that can be adjusted so the task here is to find values of these three parameters such that the above sum is minimized
+In the Von B function there are three parameters, $L_\infty$, $k$ and $t_0$ that can be adjusted so the task here is to find values of these three parameters such that the above sum is minimized
 
 
 ```{r}
@@ -188,24 +317,21 @@ minke.vonB.par
 ```
 
 
-* Formulas in R typically look for variables in the data, in this case the minke whale dataset.
-* If a variable is not in the data, such as variables "Linf", "K" and "t0", they are assumed to be parameters that need to be estimated
-* Starting values are given in the input as "start". If not given the function may converge to a wrong minima or not at all.
+Formulas in R typically look for variables in the data, in this case the minke whale dataset. If a variable is not in the data, such as variables "Linf", "K" and "t0", they are assumed to be parameters that need to be estimated. Starting values are given in the input as "start". If not given the function may converge to a wrong minima or not at all.
 
-* Confidence intervals
+### Confidence intervals
 Recall that a 95\% confidence interval represents the potential range of the data, i.e. one can not reject the hypothesis that the parameter estimate is within the range. Confidence intervals can be computed using the following command:
 ```{r}
 minke.vonB.par %>% 
   tidy(conf.int = TRUE)
-
 ```
 
 Now lets plot the output:
 
-```{r}
-minke.vonB.par %>% 
-  augment() %>% 
-  ggplot(aes(age,length)) + geom_point() + geom_line(aes(y=.fitted))
+```{r,warning=FALSE,message=FALSE}
+minke %>% 
+  add_predictions(minke.vonB.par) %>% 
+  ggplot(aes(age,length)) + geom_point() + geom_line(aes(y=pred))
 ```
 
 
