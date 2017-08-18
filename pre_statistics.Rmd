@@ -289,13 +289,12 @@ plot(fit.reduced)
 ```
 
 # Generalised linear models
-In addiont
+In addition to linear model R has support for generalised linear model (glm) and generalised additive model (gam). These essentially behave similarly as its linear model counter part. The generalised linear model can build a linear model where the response variable is non-gaussian, such as counts data and proportions. To illustrate how this 
 
 # Non-linear regression
-Now say we want to fit a growth curve to our minke whale data
-* Typically this would by a Von Bertalanffy growth curve of the form:
+Now say we want to fit a growth curve to our minke whale data. Typically this would by a Von Bertalanffy growth curve of the form:
 $$ l = L_{\infty}(1-e^{-k(a-t_0)})$$
- How do we do this in R?
+How do we do this in R?
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
 ggplot(minke,aes(age,length)) + geom_point() + theme_bw() + ylab('Length') + xlab('Age')
@@ -335,6 +334,16 @@ minke %>%
 ```
 
 
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+Using the cod dataset estimate a von Bertalanfy growth curve
+
+</div>
+</div>
+
+
 # Inferences related to categorical variables
 
 ## Equality of proportions in a population
@@ -362,19 +371,17 @@ d2 <-
 Now test the hypothesis that the sex ratio is even:
 
 ```{r}
-kyn.tab <- table(d2$sex)
+tab <- table(d2$sex)
 
-binom.test(kyn.tab)
+binom.test(tab)
 ```
 
 We see immediately that the sex ratio is not even in the dataset, i.e. the null hypothesis is rejected. In addition we see that the `binom.test` function calculates an estimate for the ratio and a 95% confidence interval. These values can be saved into a data.frame using the `tidy` function from the `broom` package:
 
 ```{r}
-binom.test(kyn.tab) %>% 
+binom.test(tab) %>% 
   tidy()
 ```
-
-`binom.test` allows for slight variations in t
 
 
 ## Comparing two or more population proportions
@@ -396,7 +403,7 @@ chisq.test(Cat1,                   ## Factor indicating group assignment
            simulate.p.value = FALSE) ## should the p-value be simulated using MC methods
 ```
 
-Taking this to our river data, we want to test if the sex ratio is different between years:
+Taking this to our cod data, we want to test if the sex ratio is different between years:
 ```{r}
 chisq.test(d2$sex,d2$year)
 ```
@@ -407,10 +414,20 @@ chisq.test(d2$sex,d2$year) %>%
   tidy()
 ```
 
-### Excercise
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 
 * Is the proportion of fish caught using a fly significantly different from other gear types? 
 * Are the number of releases significantly different between the sexes?
+
+
+</div>
+</div>
+
+
 
 
 # Inferences related to numerical variables

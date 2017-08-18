@@ -65,7 +65,7 @@ ___
 #### Day 3 - Wednesday
 
 * [Relational data](pre_joins.html) - eh/bth
-* [Statistic in R](pre_statistics.html) - bte
+* [Statistics in R](pre_statistics.html) - bte
 * [Plotting spatial data](pre_ggplot10.html) - eh
 * [Case example - DATRAS](pre_case.html), continued ... - eh
 
