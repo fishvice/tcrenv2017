@@ -24,6 +24,7 @@ knitr::opts_chunk$set(out.width='750px', dpi=200)
 
 
 # Preamble
+___
 
 #### Needed libraries for this tutorial:
 ```{r, message = FALSE, warning = FALSE, results='hide'}
@@ -42,7 +43,7 @@ glimpse(d)
 * https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf
 
 # Grammar of data
-
+___
 The tidyverse package, through the dplyr and tidyr, are a set of tools for a common set of problems connected to
 aggregates or summaries of data.
 
@@ -379,7 +380,7 @@ vital.stats
 
 
 # Reshape verbs
-
+___
 When importing data the bulk of our time goes into cleaning data in order for it be useful for further analysis. Here the guiding principle is to describe tools that allow you to transform "messy" datasets to a "tidy" dataset. A "tidy" dataset is of the form:
 
 1. Each variable forms a column.
@@ -485,7 +486,7 @@ d.united
 
 
 # Combining verbs
-
+___
 In R one can apply functions to data repeatedly:
 ```{r}
 d.summ <- 
@@ -505,7 +506,7 @@ spread(summarise(group_by(d,sex,year),n=n()),sex,n)
 dplyr allows chaining of operators using the $\%>\%$ operator
 
 ```{r}
-d %>%
+d %>% 
   group_by(sex,year) %>% 
   summarise(n=n()) 
 ```
@@ -526,6 +527,8 @@ d %>%
   arrange(year)
 ```
 The above can be read as "take data d, then split into groups by sex and year, then calculate the mean and standard deviation of length and K for each group, then arrange by year".
+
+Note that Rstudio has a built in shortcut for the `%>%` operator, [ctrl] + [shift] + M.
 
 
 <div class="panel panel-warning">
@@ -549,6 +552,7 @@ d %>%
 
 
 # Class excercise
+___
 <div class="panel panel-warning">
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">

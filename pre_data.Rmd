@@ -16,7 +16,7 @@ knitr::opts_chunk$set(warning = FALSE,
 ```
 
 # Preamble
-
+___
 Load the required packages
 ```{r}
 library(tidyverse)
@@ -32,17 +32,45 @@ download.file("http://www.hafro.is/~einarhj/data/minke.csv",destfile = 'data/min
 download.file("http://www.hafro.is/~einarhj/data/example_excel.xlsx",destfile = 'data/example_excel.xlsx')
 ```
 
+## About the data
+The minke whale dataset contains biological measurements from 192 scientific catches of minke whales between the year 2003 and 2007. The data set contains the following fields:
 
+* **whale.id**: Unique identifier for the whale
+* **date.caught**: the date when the whales was caught
+* **lat**: latitude
+* **lon**: longitude
+* **area**: Derived from location (North/South)
+* **length**: length of the whale
+* **weight**: weight of the whale
+* **age**: age of the whale
+* **sex**: Male or Female
+* **maturity**: maturity status of the whale
+* **stomach.volume**: volume (in liters) of the stomach content
+* **stomach.weight**: weight of the stomach content
+* **year**: the year when the whale was caught
 
-## Sources of data 
+The excel file has two data sets:
+The assessment summary of cod in Icelandic waters from 2017, obtained from http://dt.hafogvatn.is/astand/2017/01_cod.html . The data set contains the following fields:
 
+* **Year** 
+* **Rec** Recruitment as 3-year-olds in millions
+* **SSB**  spawning stock
+* **B4+**  reference biomass
+* **Landings** landings in tonnes
+* **HR** harvest rate (landings/reference biomass)
+* **Fbar** fishing mortality (average for ages 5–10)
+
+The second data set is the No Ballast on Board data set obtained from www.greatlakeslessons.com
+
+# Sources of data 
+___
 ![](img/sources.png)
 
 ## Reading material
 * http://r4ds.had.co.nz/data-import.html
 
 # Keyboard
-
+___
 one can simply enter data directly to the console
 ```{r}
 weight <- c(1,5,3,2,6)
@@ -88,7 +116,7 @@ save.image(file='everything.Rdata')
 
 
 # Text files
-
+___
 Text files are the most basic types of data files and commonly used in all data exchange. Most of the data that we are interested in is in some sort of tabular form and whole host of functions are available to import these files into R. These include the following functions from the `readr` package, included in the `tidyverse` package:
 
 ```{r,eval=FALSE}
@@ -293,7 +321,7 @@ Be careful with append, if not properly set the file can be overwritten.
 
 
 # Excel
-
+___
 ### Importing Excel files
 With the readxl package we can read Excel files directly into R with the `read_excel` function:
 ```{r,eval=FALSE}
@@ -396,7 +424,7 @@ write.xlsx(list(minke=minke,iCod=icod_summary),file='RtoExcel.xlsx')
 
 
 # Other statistical software
-
+___
 Data is often stored in format created by other statistical software packages such a SPSS and SAS. The haven package provides the necessary functions to import and export to these file formats:
 
 ```{r,eval=FALSE}
@@ -436,10 +464,18 @@ zap_widths    # Remove display width attributes
 
 
 # Database connectivity
-
+___
 Databases are commonly used to store (large amounts of) data and numerous software vendors provide database solutions, both general and specific
 Similarly numerous packages exist to interact with databases in R. Notably DBI, RODBC and dplyr.
-Typically in an R session the user queries the database for the data needed for a particular analysis and loads it into memory. Larger datasets, that don’t fit into memory will need to be subsampled
+Typically in an R session the user queries the database for the data needed for a particular analysis and loads it into memory. Larger datasets, that don’t fit into memory will need to be subsampled. The most common types of database engines have a specialised R package:
+
+Engine  | R-package
+------- | ---------
+**Oracle**  | ROracle
+**Postgres**  | RPostgreSQL
+**MSSQL**   | odbc
+**MySQL** | RMySQL
+**sqlite**  | RSQLite
 
 To illustrate how the database connectivity works we will set up a dummy sqlite database containing the minke dataset. The following command creates and sets up a link to a dummy database
 ```{r}
@@ -482,7 +518,7 @@ For information related to database connectivity refer to:
 
 
 # Class excercise
-
+___
 <div class="panel panel-warning">
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">
@@ -494,6 +530,6 @@ Try to open a file from "home"
 
 
 # Further readings
-
+___
 * http://r4ds.had.co.nz/data-import.html
 * http://readxl.tidyverse.org/
