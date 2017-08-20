@@ -77,7 +77,7 @@ For this course you need to have R (and Rtools), RStudio and a sweep of packages
 #### What is R?
 
 * R is command line driven programming language
-    * its biggest appeal as one can reuse commands
+    * its biggest appeal is one can **reuse** commands
     * its biggest hurdle in widespread use
 * R is open-source:
     * Other statistical software packages can be extremely expensive
@@ -85,9 +85,9 @@ For this course you need to have R (and Rtools), RStudio and a sweep of packages
 
 #### Why R?
 
-R has become the lingua franca of statistical analysis and data wrangling
+R has become the *lingua franca* of statistical analysis and data wrangling
 
-* Its free! If you are a teacher or a student, the benefits are obvious
+* Its free! If you are a teacher, a student or a user, the benefits are obvious
 * It runs on a variety of platforms including Windows, Unix and MacOS
 * It provides an unparalleled platform for programming new statistical
 methods in an easy and straightforward manner
@@ -140,7 +140,7 @@ console
 * Projects save the state between sessions. This includes:
     * Working directories
     * Open files/scripts
-    * Workspaces
+    * Workspaces (.RData file - do not save this)
 * One can have multiple RStudio projects open at any one time
     * The modern call for multitasking :-)
     
