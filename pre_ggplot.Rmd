@@ -166,9 +166,9 @@ ggplot(d) +
 # Adding layers
 ___
 
-... Say something here
+The power of ggplot comes into place when one adds layers on top of other layers.
 
-### Add a smoother to a plot
+### Add a smoother to a scatterplot
 
 ```{r, out.width = "33%", fig.show = "hold"}
 p <- ggplot(d, aes(age, length))
@@ -177,7 +177,7 @@ p + geom_point() + geom_smooth(span = 0.1)
 p + geom_point() + geom_smooth(method = "lm")
 ```
 
-The last plot a linear regression is fitted (check out ?lm).
+In the rightmost plot a linear regression is fitted (check out ?lm).
 
 <div class="panel panel-warning">
 <div class="panel-heading">Exercise</div>
@@ -198,7 +198,7 @@ ggplot(d, aes(age, length, colour = sex)) +
 # Statistical summary graphs
 ___
 
-... here some nice introductory text
+There are some useful *inbuilt* routines within the ggplot2-packages which allows one to create some simple summary plots of the raw data.
 
 ### bar plot
 
@@ -208,7 +208,7 @@ One can create bar graph for discrete data using the `geom_bar`
 ggplot(d, aes(maturity)) + geom_bar()
 ```
 
-The graph shows the number of observations we have of each maturity stage. Here the argument for stat in the `layer`function is no longer "identity" but "count":
+The graph shows the number of observations we have of each maturity stage. Here the argument for stat in the primitive `layer`function is no longer "identity" but "count":
 
 ```{r, eval = FALSE}
 ggplot(d) +
@@ -223,7 +223,7 @@ table(d$maturity, useNA = "ifany")
 
 ### histograms
 
-For continuous data one uses the 'geom_histogram'-function (left default bin-number, right bindwith specified as 50 cm): 
+For continuous data one uses the `geom_histogram`-function (left default bin-number, right bindwith specified as 50 cm): 
 
 ```{r, out.width = "50%", fig.show = "hold"}
 p <- ggplot(d, aes(length))
@@ -250,12 +250,12 @@ p + geom_freqpoly(aes(colour = sex), lwd = 1)
 
 Boxplots, which are more condensed summaries of the data than histograms, are called using `geom_boxplot`. Here two versions of the same graph are used, the one on the left is the default, but on the right we have reordered the maturity variable on the x-axis such that the median value of length increases from left to right:
 ```{r, out.width = "50%", fig.show = "hold"}
-p <- ggplot(d, aes(maturity, length)) + geom_boxplot()
+ggplot(d, aes(maturity, length)) + geom_boxplot()
 p <- ggplot(d, aes(reorder(maturity, length), length)) + geom_boxplot()
 p
 ```
 
-It is sometimes useful to plot the "raw" data over summary plots. Using `geom_point` as an overlay of the above plot (left) is not very useful, `geom_jitter` coming to the rescue (right):
+It is sometimes useful to plot the "raw" data over summary plots. Using `geom_point` as an overlay of the above plot (below, left) is not very useful, `geom_jitter` comes here to the rescue (below, right):
 ```{r, out.width = "50%", fig.show = "hold"}
 p + geom_point(colour = "red", alpha = 0.5, size = 1)
 p + geom_jitter(colour = "red", alpha = 0.5, size = 1)
