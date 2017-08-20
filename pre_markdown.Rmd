@@ -1,6 +1,6 @@
 ---
 title: "Reproducible research with R"
-output: 
+output:
   html_document:
     fig_height: 4
     fig_width: 8
@@ -8,7 +8,19 @@ output:
     theme: united
     toc: yes
     toc_float: yes
+  word_document:
+    toc: yes
 ---
+
+# Preamble
+___
+
+Packages used:
+```{r}
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+```
 
 
 # Reproducible research
@@ -74,7 +86,24 @@ Markdown is designed to be easy to write, and, even more importantly, easy to re
 
 >  A Markdown-formatted document should be publishable as-is, as plain text, without looking like it’s been marked up with tags or formatting instructions. – John Gruber
 
-Markdown does therefore only provides light text formating commands leaving the page layout to the renderer. When writing paragraphs you have the options of creating italicised text with encapsulating text with `*`. This means that is `*some text*` is rendered as *some text*. Simliarly bold text is indicated by encapsulating the text with `**`.  
+Markdown does therefore only provides light text formating commands leaving the page layout to the renderer. 
+
+### Paragraph formating
+
+When writing paragraphs you have the options of creating italicised text with encapsulating text with `*`. This means that is `*some text*` is rendered as *some text*. Simliarly bold text is indicated by encapsulating the text with `**`.  Super and subsctripts are indicated with `a^2^` (a^2^) and `b~2~` (b~2~) respectively.
+
+Horizontal rulers are created using either of the following:
+
+~~~
+***
+___
+~~~~
+
+which generates this
+
+***
+
+### Lists
 
 Bulleted and numbered lists are created using single `*` so this bit of code:
 
@@ -114,6 +143,8 @@ which becomes
 1. bla bla bla
 2. ble ble ble
 
+### Headings
+
 Section heading are created with `#` followed with the section title. Subsections and subsubsections (and subsubsub...) are created similarly with `##` and `###` etc. So the following bits of text:
 
 ~~~
@@ -130,8 +161,30 @@ is rendered as
 ### Subsubheading 
 #### Subsubsubheading
 
+### Tables
 
+Tables in Markdown are fairly easily generated using the following code:
+```
+First Header  | Second Header
+------------- | -------------
+Content Cell  | Content Cell
+Content Cell  | Content Ce
+```
+which results in:
 
+First Header  | Second Header
+------------- | -------------
+Content Cell  | Content Cell
+Content Cell  | Content Cell
+
+### Images
+
+Figures can be embedded into markdown using the the following command:
+```
+![](path/to/figure.png)
+```
+
+### Mathematical
 
 Mathematical formulas can also be rendered via the LaTeX equation environment, indicated by some commands enclosed by `$`-signs (`$$` to present the formula centered in a new line). So as a simple example the following bit of text:
 ```
@@ -140,64 +193,155 @@ $x^2 + \sum_i a_i y_i^n$
 becomes
 $$x^2 + \sum_i a_i y_i^n$$
 
-![](img/quickreference.png)
-
-Further reading: https://en.wikibooks.org/wiki/LaTeX/Mathematics
+which renders as word equation when exported to a word file.
 
 
-Tables in Markdown are fairly easy:
-```
-First Header  | Second Header
-------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | Content Ce
-```
-which becomes:
 
-First Header  | Second Header
-------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | Content Cell
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+In your markdown file investigate how various formating settings will appear in a word file. As an example:
+
+* Create a header and sub-headings
+* Create a dummy table 
+* Create a bulleted list
+* Embed a figure into the document
+
+</div>
+</div>
 
 
 
 # Embedding R
+
+One of the key things with Rmarkdown is the ability to embed R code with the document writing
+
 ![](img/markdownChunk.png)
 
-Input from R in Markdown is evaluated in **chunks**:
+R code is weaved into the document in using specialised input environments, called **chunks**:
 
 ~~~
- ```{r}
-  #<insert R code for Markdown>
- ```
+# ```{r}
+#  #<insert R code for Markdown>
+# ```
 ~~~
 
-Chunks have a plethora of options available by default:
+In these chunks you can place any type of R command which will be run whenever the document is rendered. The code chunks rememeber the results from previous chunks in the document, so the Rmarkdown file behaves like a regular R-script. Code chunks can be created either by selecting "Insert chunk" from the "Code" menu in Rstudio or by using the keyboard shortcut [ctrl] + [alt] + I. By default chunks are rendered such that both the code in the chunk is visible and the output, which is either a figure or printout from the console. So 
 
-* Allows you to display or hide code
-* Similarly display or hide its output
-* Figure dimensions can be set (if created by in the chunk)
+~~~
+# ```{r}
+#  x <- 1
+#  x
+# ```
+~~~
 
-* eval = TRUE : Evaluate all or part of the current chunk
-* echo = TRUE : Show all or part of the source code
-* results = 'asis' : Writes raw output from R to the output document without markup. Helpful for creating tables with xtable. markup is the default.
-* include = TRUE : Code chunk will be included in output. If you don't want a chunk in the output but still evaluated set this to FALSE
-* fig.width controls the figure width (in inches)
-* fig.height controls the figure height (in inches)
-* fig.cap is the figure caption
-* fig.align sets the alignment
-* dev allows the user to specify the file type of the plot (png, pdf, bmp, etc..)
-
-
-
-But one can also use R commands to create tables. Note: Set results='asis' to write raw results from R into the output document
-```{r,eval=FALSE}
-library(knitr)
-kable(tab,caption = 'This is a table')
+will be rendered as:
+```{r}
+x <- 1
+x
 ```
 
 
-# Bibliography
+How the code is rendered is can be controlled to fairly fine detail with chunk options. These are set within the curly braces at the start of the chunk. For instance if you only want the output from the calculation but hide the code you change the `echo` setting to `FALSE`:
+
+~~~
+# ```{r,echo=FALSE}
+#  x <- 1
+#  x
+# ```
+~~~
+which becomes:
+```{r,echo=FALSE}
+x <- 1
+x
+```
+
+Figures are rendered in place:
+
+```{r}
+plot(1:9)
+```
+
+and you can control the figure width and height using the `fig.width` and `fig.height` options. So this chunk:
+
+~~~
+# ```{r,fig.height=6,fig.width=3,echo=FALSE}
+# plot(1:9)
+# ```
+~~~
+
+results in this:
+
+```{r,fig.height=6,fig.width=3,echo=FALSE}
+plot(1:9)
+```
+
+
+In additions to the options chunks have a plethora of other options available to further control the output:
+
+Options | Description
+------- | -----------
+`eval = TRUE` | Evaluate all or part of the current chunk
+`echo = TRUE` | Show all or part of the source code
+`message = TRUE`  | Show all messages from the console
+`warning = TRUE`  | Show all warnings 
+`results = 'asis'`  | Writes raw output from R to the output document without markup. Helpful for creating tables with xtable. markup is the default.
+`include = TRUE`  | Code chunk will be included in output. If you don't want a chunk in the output but still evaluated set this to FALSE
+`fig.width = 8` | controls the figure width (in inches)
+`fig.height = 4`  | controls the figure height (in inches)
+`fig.cap = 'Figure caption'`  | is the figure caption, note captions are only rendered when captions are enabled. 
+`fig.align = [ht]`  | Sets the figure alignment in pdf output
+`dev` | allows the user to specify the file type of the plot (png, pdf, bmp, etc..)
+`cache = FALSE` | Should the calculations in this chunk be cached, very useful for heavy calculations  
+
+
+Tables can can also be generated from code chunks. The `kable` function from the `knitr` package can take any data frame an turn it into a table. Thes following chunk will produce a table from the `tab` data frame. Note the `results = 'asis'`.
+
+~~~
+# ```{r,echo=FALSE,results='asis'}
+# tab <- data_frame(x=1:3,a=letters[x])
+# kable(tab,caption = 'This is a table caption')
+# ```
+~~~
+
+This will become:
+
+```{r,echo=FALSE,results='asis'}
+tab <- data_frame(x=1:3,a=letters[x])
+kable(tab,caption = 'This is a table caption')
+```
+
+R codes in RMarkdown are not limited to chunks. R commands can also be evaluated inline, that within a paragraph. This is done using the following command:
+
+~~~
+# this is paragraph with some result: `r 3*3 ` 
+~~~
+
+which becomes:
+
+> this is paragraph with some result: `r 3*3 `
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+In your markdown file:
+
+* Create a code chunk that reads in the minke whale dataset
+* Create another chunk that plots the length weight relationship with the appropriate figure caption
+* Create table illustrating the number of males and females by year
+
+</div>
+</div>
+
+# The YAML header
+
+You can control many other “whole document” settings by tweaking the parameters of the YAML header.  YAML stands for “yet another markup language”, which is designed for representing hierarchical data in a way that’s easy for humans to read and write. R Markdown uses it to control many details of the output. Many of the settings in YAML can be set using the options menu in Rstudio. Notably:
+
+
+
+
+Bibliography
 * Bibtex style citations
 
 

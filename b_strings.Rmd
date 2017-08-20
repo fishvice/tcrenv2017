@@ -1,7 +1,5 @@
 ---
 title: "Working with strings"
-author: "Bjarki Þór Elvarsson"
-date: "August 8, 2017"
 output: 
   html_document:
     fig_height: 3

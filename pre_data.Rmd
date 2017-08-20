@@ -167,10 +167,6 @@ d <- read_function('http://somwhereontheweb.com/nameOfFile.txt')
 
 Now reading in the minke whale dataset, assuming it is located in the working directory in a directory named "data", the data import is simply:
 
-```{r, echo = FALSE, eval = FALSE}
-download.file("http://www.hafro.is/~einarhj/data/minke.csv", destfile = "data/minke.csv")
-```
-
 ```{r}
 minke <- 
   read_csv('data/minke.csv')
@@ -196,7 +192,7 @@ minke <-
 
 * How would you import data where the column separator is "|"
 * You current working directory is "~/Documents/workdir1/" and you want to read a file named "data.csv" in "~/Documents/datadir/". Can you think of two ways to write the file path?
-* How would you read in this file:
+* Copy the following text to a text file and read in this file using `read_delim`:
 ```
 this is some data
 col1 col2 col3 
