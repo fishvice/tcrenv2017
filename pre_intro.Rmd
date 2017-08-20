@@ -29,7 +29,7 @@ knitr::include_graphics("img/data_science.png")
 ```
 
 * Import
-    * Import data stored in a file, database, or web API, and load it into a data frame in R
+    * Import data stored in a file, database, or web API, and load it into R
 * Tidy
     * Each column is a variable, and each row is an observation
 
@@ -47,6 +47,7 @@ knitr::include_graphics("img/data_science.png")
     * May show unexpected things
     * May raise new questions about the data
     * A powerful communication platform
+    * ...
 * Model
     * Once questions made sufficiently precise, one can use a model to answer them
     * Model cannot question its own assumptions!
@@ -55,7 +56,7 @@ knitr::include_graphics("img/data_science.png")
 
 ### Our aim
 
-Our aim in this short course short is to:
+Our aim in this short course is to:
 
 * Get you up and running with importing, visualization and transformation of data.
 * Introduce you to reproducible analysis and document writing.
