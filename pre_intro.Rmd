@@ -97,6 +97,7 @@ methods in an easy and straightforward manner
 
 * Latest version of __R__: see [The Comprehensive R Archive Network](https://cran.r-project.org/)
     * If your platform is Windows, also install [Rtools](https://cran.r-project.org/bin/windows/Rtools)
+   * If your platform is Mac, install **XCode** via AppStore.
 
 ### RStudio
 
