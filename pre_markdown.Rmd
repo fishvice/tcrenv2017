@@ -10,6 +10,7 @@ output:
     toc_float: yes
   word_document:
     toc: yes
+bibliography: example.bib
 ---
 
 # Preamble
@@ -336,15 +337,79 @@ In your markdown file:
 
 # The YAML header
 
-You can control many other “whole document” settings by tweaking the parameters of the YAML header.  YAML stands for “yet another markup language”, which is designed for representing hierarchical data in a way that’s easy for humans to read and write. R Markdown uses it to control many details of the output. Many of the settings in YAML can be set using the options menu in Rstudio. Notably:
+The YAML (**Y**et **A**nother **M**arkup **L**anguage) header is the top part of the Rmarkdown document.  R Markdown uses it to control many details of the output, such as the title and author. Many of the settings in YAML can be set using the options menu in Rstudio. The following table shows a couple of the most commonly set YAML options:
+
+Option  | Description
+------- | -----------
+*author*  | The document author
+*date*  | Date of the document
+*title* | Title of the document
+*output*  | Can be *html_document*, *pdf_document*, *word_document*
+*fig_width* and *fig_height* | Default figure width, can be overridden with chunk options
+
+However there are two useful additional settings in the YAML header that cannot be set with menu options, bibliographic citations and word style templates.
+
+### Bibliography
+
+Bibliographic references can be added to a markdown file quite easily. To use this feature you need to set the `bibliography` field in the YAML header and this setting should point to the location of the references.  The references are read from a BibTeX-file, a special file format for bibligraphic citations. A typical BibTeX file looks something like this:
+
+~~~
+@book{darwin2009origin,
+  title={The origin of species by means of natural selection: or, the preservation of favored races in the struggle for life},
+  author={Darwin, Charles and Bynum, William F},
+  year={2009},
+  publisher={AL Burt}
+}
+
+@article{pope2009honey,
+  title={Honey, I cooled the cods: Modelling the effect of temperature on the structure of Boreal/Arctic fish ecosystems},
+  author={Pope, John G and Falk-Pedersen, Jannike and Jennings, Simon and Rice, Jake C and Gislason, Henrik and Daan, Niels},
+  journal={Deep Sea Research Part II: Topical Studies in Oceanography},
+  volume={56},
+  number={21},
+  pages={2097--2107},
+  year={2009},
+  publisher={Elsevier}
+}
+
+~~~
 
 
+and the YAML header referencing the bibliography could look something like:
 
+~~~
+---
+title: "Example"
+output:
+  html_document
+bibliography: example.bib
+---
+~~~
 
-Bibliography
-* Bibtex style citations
+You can the cite the relevant entries from BibTex file using the `@shortname`, which gives you an inline reference or `[@shortname]` to cite within parenthesis (or `[@short1; @short2]` to cite more than one). So if you want to cite Darwins origin orign of the species do @darwin2009origin which will result in @darwin2009origin, and within parenthesis `[@darwin2009origin; @pope2009honey]` or [@darwin2009origin; @pope2009honey].
 
+### Word style templates
 
+If you want the appearance of your word document to mimic another word document you can use the `reference_docx` option in the YAML header:
 
+~~~
+---
+title: "Test"
+output:
+  word_document: 
+    reference_docx: tmp.docx
+---
+~~~
 
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+In your markdown file:
+
+* Add bibliography to your file
+* Download an ICES word document and use a template for the resulting word document
+</div>
+</div>
+
+# References
 
