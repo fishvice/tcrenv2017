@@ -20,16 +20,24 @@ ___
 Load the required packages
 ```{r}
 library(tidyverse)
+
+# Statistical software
 library(haven)
+
+# Excel I/O
 library(readxl)
 library(openxlsx)
+
+# for database access
+library(dbplyr)
+library(RSQLite)
 ```
 
 Get the datasets and place the datasets in a folder called "data"
 ```{r,eval=FALSE}
 dir.create('data')
 download.file("http://www.hafro.is/~einarhj/data/minke.csv",destfile = 'data/minke.csv')
-download.file("http://www.hafro.is/~einarhj/data/example_excel.xlsx",destfile = 'data/example_excel.xlsx')
+download.file("http://www.hafro.is/~einarhj/data/example_excel.xlsx",destfile = 'data/example_excel.xlsx',mode='wb')
 ```
 
 ## About the data
