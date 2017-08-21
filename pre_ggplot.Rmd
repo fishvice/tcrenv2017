@@ -261,6 +261,20 @@ p + geom_point(colour = "red", alpha = 0.5, size = 1)
 p + geom_jitter(colour = "red", alpha = 0.5, size = 1)
 ```
 
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+Read the help on `geom_violin` and create a code that results in this plot:
+
+```{r, echo = FALSE}
+ggplot(d, aes(reorder(maturity, length), length)) + 
+  geom_violin(scale = "width") +
+  geom_jitter(col = "red", alpha = 0.5, size = 1)
+```
+
+</div>
+</div>
 ### Other statistical summaries
 
 Using `stat_summary` one can call specific summary statistics. Here are examples of 4 plots, going from top-left to bottom right we have:
@@ -278,6 +292,21 @@ p + stat_summary(fun.y = "mean", fun.ymin = "min", fun.ymax = "max", geom = "poi
 p + stat_summary(fun.data = "mean_se")
 p + stat_summary(fun.data = "mean_cl_boot")
 ```
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+Create a code that results in this plot:
+
+```{r, echo = FALSE}
+ggplot(d, aes(age, length, colour = sex)) + 
+  stat_summary(fun.y = "mean", fun.ymin = "min", fun.ymax = "max", geom = "pointrange")
+```
+
+
+</div>
+</div>
 
 # Some controls
 ___
