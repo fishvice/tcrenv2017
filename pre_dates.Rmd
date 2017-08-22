@@ -16,12 +16,12 @@ knitr::opts_chunk$set(warning = FALSE,
 ```
 
 ```{r}
+library(icesDatras)
 library(lubridate)
 library(tidyverse)
 library(cowplot)
 theme_set(theme_bw())
 ```
-
 
 # Preamble
 ___
@@ -42,7 +42,8 @@ now  ()    # datetime
 # generating dates from strings - different format, same date
 ymd("2017-08-23")
 ymd("20170823")
-ymd("20132308")   # returns NA
+ymd("20132308")   # returns NA, why?
+ymd("20170229")   # returns NA, why?
 dmy("23-8-2017")
 mdy("8/23/2017")
 make_date(2017, 8, 23)
@@ -51,6 +52,11 @@ ymd_hm("2017/08/23 08:01")
 ymd_hms("2017/08/23 08:01:59")
 ymd_hms("20170823 080159")
 make_datetime(2017, 8, 23, 8, 1, 59)
+
+# sequence of dates
+seq(ymd("2017-08-23"), ymd("2017-12-23"), by = "day")
+seq(ymd("2017-08-23"), ymd("2017-12-23"), by = "week")
+seq(ymd("2017-08-23"), ymd("2017-12-23"), by = "year")
 ```
 
 # Creating date and datetime
@@ -58,7 +64,7 @@ make_datetime(2017, 8, 23, 8, 1, 59)
 In our example case, the "exchange format" of the DATRAS haul data we have date and time components stored as separate variables. Lets extract some data and start by selecting part of the variables, mostly those that deal with date/time:
 ```{r}
 df <- 
-  icesDatras::getDATRAS("HH", survey = "NS-IBTS", years = 2014, quarters = 1) %>% 
+  getDATRAS("HH", survey = "NS-IBTS", years = 2014, quarters = 1) %>% 
   as_tibble() %>% 
   unite(id, country = Country, Year, Quarter, Ship, Gear, HaulNo, remove = FALSE) %>% 
   select(id, Year:TimeShot, Quarter, HaulDur, DayNight, Country)
