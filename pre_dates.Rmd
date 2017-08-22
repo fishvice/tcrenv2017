@@ -32,9 +32,9 @@ As stated in [r4ds](http://r4ds.had.co.nz/dates-and-times.html):
 
 "There are three types of date/time data that refer to an instant in time:
 
-* A **date**. Tibbles print this as <date>
-* A **time** within a day. Tibbles print this as <time>.
-* A **date-time** is a date plus a time: it uniquely identifies an instant in time (typically to the nearest second). Tibbles print this as <dttm>. Elsewhere in R these are called POSIXct, but I don’t think that’s a very useful name."
+* A **date**. Tibbles print this as "date"
+* A **time** within a day. Tibbles print this as "time".
+* A **date-time** is a date plus a time: it uniquely identifies an instant in time (typically to the nearest second). Tibbles print this as "dttm". Elsewhere in R these are called POSIXct, but I don’t think that’s a very useful name."
 
 ```{r, eval = FALSE}
 today()    # date
