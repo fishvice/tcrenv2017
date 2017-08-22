@@ -52,21 +52,22 @@ ___
 #### Day 1 - Monday
 
 * [Introduction](pre_intro.html) - eh
-* [Reproducible research with R](pre_markdown.html) - bte
 * [Getting data into R](pre_data.html) - bte
 * [Getting started with ggplot](pre_ggplot.html) - eh
 
 #### Day 2 - Tuesday
 
+* 09:00 - 10:00 - recapitulation of yesterday
+* [Reproducible research with R](pre_markdown.html) - bte
 * [Getting started with dplyr](pre_dplyr.html) - bte
 * [Working with dates](pre_dates.html) - eh
-* [Case example - DATRAS](pre_case.html) - eh
+* [Plotting spatial data](pre_ggplot2.html) - eh
 
 #### Day 3 - Wednesday
 
+* [Case example - DATRAS](pre_case.html) - eh
 * [Relational data](pre_joins.html) - eh/bth
 * [Statistics in R](pre_statistics.html) - bte
-* [Plotting spatial data](pre_ggplot10.html) - eh
 * [Case example - DATRAS](pre_case.html), continued ... - eh
 
 #### Day 4 - Thursday

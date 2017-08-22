@@ -15,6 +15,8 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 ```{r, message = FALSE, warning = FALSE, results='hide'}
+library(devtools)
+# install_github("tidyverse/ggplot2")
 library(geo)
 library(maps)
 library(mapdata)
@@ -23,7 +25,7 @@ library(tidyverse)
 library(cowplot)
 theme_set(theme_grey())
 library(ggmap)
-minke <- read_csv("http://www.hafro.is/~einarhj/data/minke.csv")
+minke <- read_csv("data/minke.csv")
 ```
 
 # Getting started
@@ -64,14 +66,15 @@ The above sweep of plots demonstrate that background maps are just a set of long
 
 ## Projections
 
-As noted above the 
+As noted above a map is just a xy-plot but with a certain projections. We could try to guess the projections (i.e. the aspect ration of the plot) as done on the left, or better still use the `geom_quickmap` function (on the right):
+
 ```{r}
 p1 <- p3 + coord_fixed(ratio = 2.4)
 p2 <- p3 + coord_quickmap()
 plot_grid(p1, p2)
 ```
 
-The above demonstrates that a spatial map in its simplest term is just an xy-plot with a specific projection. Note that the `coord_quickmap` is only an approximation, if one is operating on a fine scale `coord_map` may be more accurate.
+The above demonstrates that a spatial map in its simplest term is just an xy-plot with a specific projection. Note that the `coord_quickmap` is only an approximation, if one is operating on a fine scale `coord_map` may be more accurate (actually all maps are wrong when put on a two dimentional pane).
 
 ## Selecting a background by boundaries
 
@@ -101,7 +104,7 @@ Here there are two additional element introduced:
 <div class="panel-body">
 
 1. Play around by plotting different regions or areas
-2. Read the `coord_map` help file for projections other than the default "mercator". Trey to create a map that looks something along:
+2. Read the `coord_map` help file for projections other than the default "mercator". Try to create a map that looks something along:
 
 ```{r, echo = FALSE}
 map_data("world") %>% 
@@ -216,13 +219,20 @@ m2 +
 ## Shapefiles
 
 Myriads of useful shapefiles are available on the web, include on the ices web. An example is the shapefile that contains the 10 roundish areas of the North Sea. We can obtain it directly from within R via:
+
+* First we use the `download.file` function, specifying the web location and the destination of where we want to store the file.
+* Unzip the file using `unzip` function specifying where we want the content of the zipped file to be stored. 
+
+```{r, eval = FALSE}
+download.file(url = "http://gis.ices.dk/Shapefiles/6951716_output.zip",
+              destfile = "data/6951716_output.zip", mode = "wb")
+unzip("data/6951716_output.zip", exdir = "data")
+```
+
+If you now look into the data directory you will have four files starting with "Shapefile" and then four different suffixes. These are standard ESRI files that can be read into R via myriads of functions. Lets use the `st_read` function from the sf-package (which is currently in the process of development):
 ```{r}
-tmp <- tempfile()
-download.file("http://gis.ices.dk/Shapefiles/6951716_output.zip",
-              destfile = tmp)
-tmpdir <- tempdir()
-unzip(tmp, exdir = tmpdir)
-ns_area <- sf::st_read(paste0(tmpdir, "/Shapefile.dbf"), quiet = TRUE)
+library(sf)
+ns_area <- sf::st_read("data/Shapefile.dbf", quiet = TRUE)
 class(ns_area)
 ```
 
@@ -249,8 +259,8 @@ ns_area %>%
 
 We are often interested in summarizing spatial data onto a grid for presentations. A typical example are logbook data which often can hold millions of records. Lets read in some bottom trawl logbook data from Iceland:
 ```{r}
-# You have to download the data from our sharepoint
-station  <- read_csv("data-raw/logbook_station.csv")
+# You have to download the data from our sharepoint 
+station  <- read_csv("data/logbook_station.csv")
 glimpse(station)
 ```
 
@@ -298,7 +308,7 @@ In addition to the station (tow) file there is an associated file containing inf
 
 
 ```{r, echo = FALSE, eval = FALSE}
-catch <- read_csv("data-raw/logbook_catch.csv")
+catch <- read_csv("data/logbook_catch.csv")
 station %>% 
   mutate(year = year(date),
          sq = geo::d2ir(lat, lon)) %>% 
