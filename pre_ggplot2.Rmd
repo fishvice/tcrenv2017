@@ -62,7 +62,7 @@ p4 <- p + geom_polygon()
 plot_grid(p1, p2, p3, p4)
 ```
 
-The above sweep of plots demonstrate that background maps are just a set of longitudinal and latitudinal data that are **ordered** in a specific way (check help file for `geom_line` vs `geom_path`
+The above sweep of plots demonstrate that background maps are just a set of longitudinal and latitudinal data that are **ordered** in a specific way (check help file for `geom_line` vs `geom_path`).
 
 ## Projections
 
@@ -144,15 +144,17 @@ plot_grid(p1, p2)
 
 ## Depth contours
 
-In oceanography one is often interested in indicating depth contours. Global relief models from the ETOPO1 dataset hosted on a NOAA server can be accessed using the `getNOAA.bathy`-function in the marmap-package. To access them one specifies the boundary of the data of interest and then, since we are using ggplot for mapping are turned into a data frame using the `fortify`-function:
+In oceanography one is often interested in indicating depth. Global relief models from the ETOPO1 dataset hosted on a NOAA server can be accessed using the `getNOAA.bathy`-function in the marmap-package. To access them one specifies the boundary of the data of interest and then, since we are using ggplot for mapping are turned into a data frame using the `fortify`-function:
 
 ```{r}
 xlim <- c(-28, -10)
 ylim <- c(62.5, 67.5)
 library(marmap)
 depth <- 
-  getNOAA.bathy(lon1 = xlim[1], lon2 = xlim[2], lat1 = ylim[1], lat2 = ylim[2], resolution = 1) %>% 
-  fortify()
+  getNOAA.bathy(lon1 = xlim[1], lon2 = xlim[2],
+                lat1 = ylim[1], lat2 = ylim[2],
+                resolution = 1) %>% 
+  fortify()  # turn the object into a data.frame
 glimpse(depth)
 ```
 
@@ -162,7 +164,9 @@ So this data is just a set of x (longitude), y (latitudes) and z (depth). The da
 depth %>% 
   filter(z <= 0) %>% 
   ggplot() +
-  geom_raster(aes(x, y, fill = z))
+  theme_bw() +
+  geom_raster(aes(x, y, fill = z)) +
+  coord_quickmap(expand = FALSE)
 ```
 
 We generate the base map with contours as follows:
@@ -177,10 +181,33 @@ m <- ggplot() +
   labs(x = NULL, y = NULL)
 ```
 
+Lets just look at what we have created:
+```{r}
+m
+```
+
 Here we have specified depth contour values of 25, 50, 100, 200 and 400 meters. Now we are ready to add the minke data or any other data of interest:
+
 ```{r}
 m + geom_point(data = minke, aes(lon, lat), colour = "red")
 ```
+
+
+#### Exercise
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+1. Create a depth raster map of the region of your interest, e.g. for the longitudinal and latitudinal range that covers your data. If you do not have spatial data, use the NS-IBTS station data from the [Working with dates](pre_dates.html) presentation.
+2. Create a contour map of the region of your interest, specifying your own preference for the depth range to show.
+3. Overlay your own data on top of the contour map.
+4. Try a plot where the raster image of depth is the background, overlay the contours and then your data. Although the image may look sexy, think about the **main** message your are trying to convey to the recipient of such a plot.
+
+</div>
+</div>
+
+
 
 ## Background images
 
