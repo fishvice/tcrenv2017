@@ -94,9 +94,6 @@ Here there are two additional element introduced:
 * The **variable** group in the m-dataframe is a unique identifier of each separate shape (islands etc.). By specifying the **arguement** group in the `aes`-function one prevents that polygons are drawn across separate elements (try omitting the group-argument).
 * The limits are specified inside the call in function `coord_quickmap`. This is because the function `map_data` returns the whole regions that fall within the boundaries (try `coord_quickmap` without any argument).    
 
-
-
-
 #### Exercise
 
 <div class="panel panel-warning">
@@ -258,8 +255,11 @@ ns_area %>%
 # Gridding data
 
 We are often interested in summarizing spatial data onto a grid for presentations. A typical example are logbook data which often can hold millions of records. Lets read in some bottom trawl logbook data from Iceland:
+
 ```{r}
-# You have to download the data from our sharepoint 
+# You can download the data from
+# http://www.hafro.is/~einarhj/data/logbooks_station.csv
+# http://www.hafro.is/~einarhj/data/logbooks_catch.csv
 station  <- read_csv("data/logbook_station.csv")
 glimpse(station)
 ```
@@ -300,7 +300,11 @@ st %>%
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">
 
-In addition to the station (tow) file there is an associated file containing information on the catches (kg) by species in each tow (logbook_catch.csv)
+0. Repeat the exercise but use some tile-map background.
+
+**Will visit the exercise below once we gone through the join family of functions**.
+
+In addition to the station (tow) file there is an associated file containing information on the catches (kg) by species in each tow (logbook_catch.csv).
 
 1. Read in the file (you download it from the sharepoint)
 2. Select two species, e.g. *S. mentella* (61) and plaice (23), summarize the catch of each by year and ICES rectangle and plot it.
