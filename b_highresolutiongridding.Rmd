@@ -1,0 +1,79 @@
+---
+title: "High resolution gridding"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+### Preamble
+
+A short piece of code demonstrating fine-scale gridding.
+
+### Generate some artifical data
+
+Generate a small data set of one million rows:
+```{r}
+library(tidyverse)
+df <- data_frame(lon = rnorm(1e6, -28, 2),
+                 lat = rnorm(1e6, 64,  2),
+                 effort = rnorm(1e6, 1000, 200))
+```
+
+### Create a gridding functions
+
+```{r}
+# code from ziggy stardust
+#   note that here there is not validation/testing done
+#   read: use stuff at own risk
+
+encode_zchords <- function(x, y, dx = 1, dy = 0.5 * dx, invalids = TRUE) {
+
+  x.brks <- seq(floor(min(x)),ceiling(max(x)),dx)
+  x.ints <- findInterval(x, x.brks, all.inside = TRUE)
+  x <- (x.brks[x.ints] + x.brks[x.ints + 1]) / 2
+
+  y.brks <- seq(floor(min(y)),ceiling(max(y)),dy)
+  y.ints <- findInterval(y, y.brks, all.inside = TRUE)
+  y <- (y.brks[y.ints] + y.brks[y.ints + 1]) / 2
+
+  if(invalids) {
+    x <- ifelse(x >= -180 & x <= 180, x, NA)
+    y <- ifelse(y >= -90  & y <= 90 , y, NA)
+  }
+
+  return(paste(round(x,6), round(y,6), sep = ":"))
+
+}
+```
+
+
+### Grid the data
+
+Here we use a 0.05 decimal degree resolution or grid for the lon, 0.025 for the lat:
+```{r}
+d <- 
+  df %>% 
+  mutate(sq = encode_zchords(lon, lat, dx = 0.05, dy = 0.025), type = "zchords") %>% 
+  group_by(sq) %>% 
+  summarise(effort = sum(effort)) %>% 
+  separate(sq, c("lon", "lat"), sep = ":", convert = TRUE, remove = FALSE)
+```
+
+What do we have:
+```{r}
+glimpse(d)
+```
+
+The character variable **sq** is the coded "square". Here, differently from e.g. the ICES statistical rectangle or the csquare encoding system the mid points for lon and lat are embedded in the square encoding, separated by a colon. Hence getting the value of the lon and the lat is as simple as calling the now hopefully familiar `separate`-function.
+
+### The plot
+
+```{r}
+d %>% 
+  ggplot(aes(lon, lat, fill = effort)) +
+  geom_raster() +
+  coord_quickmap()
+```
+
