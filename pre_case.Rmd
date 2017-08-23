@@ -1,6 +1,5 @@
 ---
-title: "Case example - working with DATRAS data"
-subtitle: "Part 1"
+title: "Exercises using DATRAS data"
 output: 
   html_document:
     fig_height: 4
@@ -16,20 +15,13 @@ knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE)
 ```
 
-TODO: Revamp and expand
-
 # Preamble
 ___
 
 * Here we want to enhance our skills in the use of grammar of data and graphics
 * To that end we use the [DATRAS survey data](http://www.ices.dk/marine-data/data-portals/Pages/DATRAS.aspx) as a **case example**.
-    * They were retrieved using functions from the xxx-package and then ..., [see](datras_importing_and_tidying.html)
-* ....
-* .. and end up with some catch per haul and mean abundance trends
-
-... the base data is similar to cpue_per_length_per_haul that is one of the [Datras service product](https://datras.ices.dk/Data_products/Download/Download_Data_public.aspx)
-
-...
+    * They were retrieved using functions from the icesDatras-package and then tidyed up a bit ([see](datras_importing_and_tidying.html)). The base data is similar to cpue_per_length_per_haul that is one of the [Datras service product](https://datras.ices.dk/Data_products/Download/Download_Data_public.aspx)
+* The coding drill below is by no means meant to mimic the "offical" calculation of the DATRAS data, more just to illustrate how one can get an quick overview of the data.
 
 # The data
 ___
@@ -42,9 +34,9 @@ For those that do not already know, procedure in a groundfish surveys goes quite
 
 Given the above the data are often stored in separate tables. Here we have three tables.
 
-### Station table
+#### Station table
 
-Dataframe **st**, it contains the following fields:
+Dataframe **tidy_st**, it contains the following fields:
 
   * __id__: Unique station id which for the DATRAS data is a combination of the variables year, quarter, ship, gear and haulno.
   * __survey__: Survey identification (in the case example "NS-IBTS")
@@ -57,36 +49,35 @@ Dataframe **st**, it contains the following fields:
   * __shootlong__: Longitude of the haul start location
   * __datetime__: Haul start time
   * __depth__: Bottom depth in meters
-  * __area__: XXX
+  * __area__: Fish region (in NS-IBTS one has 10 regions)
   * __subarea__: ICES statistical rectangle
   * __daynight__: Categorization code, "D" or "N"
-  * __datatype__: Categorization of ... XXX
+  * __datatype__: Represents is data in the length table has been standardized to 30 minutes in the length table (C or R).
   
 
-### Length table:
+#### Length table:
 
-Dataframe **le**, it contains the following fields:
+Dataframe **tidy_le**, it contains the following fields:
 
 * __id__: Unique station id (see above)
 * __latin__: Species latin name
 * __sex__: Sex code
-  * __B__: XXX
-  * __F__: Female
-  * __M__: Male
-  * __U__: XXX
-  * __NA__: Not recorded
+    * __B__: ...
+    * __F__: Female
+    * __M__: Male
+    * __U__: ...
+    * __NA__: Not recorded
 * __length__: Length in centimeters
 * __n__: Number of fish by standardized 30 minutes haul duration
+* ... a bunch of additional fields that are redundant
 
-
-# Data munging
-___
 
 #### Needed packages
 
 ```{r}
+library(maps)
+library(mapdata)
 library(tidyverse)
-library(ggjoy)
 theme_set(theme_grey(base_size = 16))
 ```
 
@@ -103,254 +94,264 @@ theme_set(theme_grey(base_size = 16))
 
 #### Load the data
 
+Download the data - do this only once:
+```{r, eval = FALSE}
+download.file(url = "http://www.hafro.is/~einarhj/data/nsibts_tidy.rda",
+              destfile = "data/nsibts_tidy.rda")
+```
+
+Load the data for the current session:
 ```{r}
-load(url("http://www.hafro.is/~einarhj/data/nsibts_tidy.rda"))
-```
-
-# Catch per haul per year
-
-Here we are interested in getting information about the catch per unit effort of a particular species over time.
-
-#### 1. Specify a year and a species
-
-```{r pick}
-Year <- 2001
-Latin <- "Melanogrammus aeglefinus"
-```
-
-#### 2. Subset (filter) the length table
-
-Since the year in the length table is "hidden" in the variable id, we need to extract that using the function `separate`.
-
-```{r le}
-le <-
-  tidy_le %>% 
-  separate(id,
-           into = c("year", "quarter", "ship", "gear", "haulno"),
-           sep = "_", 
-           convert = TRUE, 
-           remove = FALSE) %>% 
-  filter(year %in% Year,
-         latin == Latin)
+load("data/nsibts_tidy.rda")
 ```
 
 <div class="panel panel-warning">
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">
 
-* Calculate the total number of fish caught
-* Plot the total length frequency distribution
-* Modify the plot above to obtain the frequency distribution by sex
-* Obtain the year information in the length table directly from the **id** variable in that table (hint: check out ?separate)
+1. Familiarise yourself and check the structure of the data, such as number of rows, the type of the variables, how many and what years, quarters, species, etc. are in the data set. Check also for missing values.
+2. Calculate and plot the number of stations taken per year
+3. Pick a year and plot the station locations.
+
+```{r, echo = FALSE, eval = FALSE}
+tidy_st %>% 
+  group_by(year) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(year, n )) +
+  geom_point() +
+  geom_line()
+
+tidy_st %>% 
+  filter(year == 2017) %>% 
+  ggplot(aes(shootlong, shootlat)) +
+  geom_point() +
+  coord_quickmap() +
+  labs(x = NULL, y = NULL)
+```
 
 </div>
 </div>
 
-```{r echo = FALSE, eval = FALSE}
-sum(le$n)
-ggplot(le, aes(length, n)) + geom_col()
-p <- le %>% 
-  group_by(length) %>% 
-  summarise(n = sum(n)) %>% 
-  ggplot(aes(length, n)) +
-  scale_x_continuous(breaks = seq(0,140,10)) +
-  expand_limits(x = 0)
-p + geom_line()
-p + geom_polygon(fill = "grey")
-le %>% separate(id, c("year", "quarter", "ship", "gear", "haulno"))
-```
 
-#### 4. Summarise the length distribution per haul, ignoring sex
-
-Since we are going to ignore sex in the following analysis, lets summarise the abundance (**n**) by each haul and length class:
-
-```{r}
-le <- 
-  le %>% 
-  group_by(id, length) %>% 
-  summarise(n = sum(n)) %>% 
-  ungroup()
-```
-
-We now, have generated an abundance estimates by length class for each haul. Lets take random samples of 20 hauls and visualize the data:
-```{r}
-ids <- sample(unique(le$id), size = 20)
-le %>% 
-  filter(id %in% ids) %>% 
-  ggplot(aes(length, n, colour = id)) +
-  geom_line() +
-  theme(legend.position = "none")
-```
-
-One observes that the abundance between hauls is quite variable.
-
-#### ... and calculate the approximate weight
-```{r weight}
-le <-
-  le %>% 
-  mutate(wt = (0.01 * length^3)/1000, # weight of individual kilos
-         b  = n * wt)                 # the catch weight in each length class
-```
-
-Does the unit weight calculation make rough sense?
-
-#### Condensed script
-
-The above lines of codes can be chained into a single piped-script (if we ignore filtering by some years):
-
-```{r, eval = FALSE}
-# NOT RUN
-le %>% 
-  filter(latin %in% Latin) %>% 
-  group_by(id, length) %>% 
-  summarise(n = sum(n)) %>%
-  mutate(b = n * (0.01 * length^3)/1000) %>% 
-  ungroup()
-```
-
-# Functions
+# Summarise catch per haul per year
 ___
 
-Here we take a little **digression** and introduce generation of a [function](http://r4ds.had.co.nz/functions.html).
+Here we are interested in getting information about the catch per unit effort of a particular species over time.
 
-The reason being that we are likely going to use the above script often (at least if we are avid DATRAS users), e.g. for different year(s) or different species. So we may as well turn the above script into a function.
+Lets simply generate the median and quantile abundance. We first need to summarise the abundance by each station (basically we ignore/collapse the abundance information by length):
 
 ```{r}
-catch_per_haul_per_length <- function(le, a = 0.01, p = 3, scale = 1000) {
-  
-  le %>% 
-    group_by(latin, id, length) %>% 
-    summarise(n = sum(n)) %>%
-    mutate(b = a * length^p,
-           b  = n * wt / scale) %>% 
-    ungroup()
-  
-}
+le <-
+  tidy_le %>% 
+  filter(latin == "Gadus morhua") %>% 
+  group_by(id) %>% 
+  summarise(n = sum(n))
 ```
 
-Note that there where only three things needed to turn the script into a function:
+The number of unique stations in the length and the station table are:
+```{r}
+nrow(le)
+nrow(tidy_st)
+```
 
-* The first line where we name the function and pass the data (*le*, *a*, *p* and *scale*) to the function call as **arguements**
-* Wrapped the script inside `{ }`
-* The last three arguments to the function, passing values for *a*, *p* and *scale*, was not really needed. We could just as well have used the "hardwired" values as in the script above.
+So we have missing stations in the length table - this basically means we have a lot a stations where no cod was caught. So we need to join the length data to the station data:
 
-One additional element was also sneaked into the code in the function - wander if you can spot it?
-
-Also, take note that here we pass the length dataframe **1st**. **Then** we pass the "optional" arguments. In these cases a default value is provided within the function-call, but users can override them by providing other values. The relevance of this becomes apparent in the next section.
+```{r}
+d <-
+  tidy_st %>% 
+  # lets only take some relevant variable
+  select(id, year, lon = shootlong, lat = shootlat, sq = subarea) %>% 
+  left_join(le)
+```
 
 <div class="panel panel-warning">
-<div class="panel-heading">You do</div>
+<div class="panel-heading">Exercise</div>
 <div class="panel-body">
 
-1. Copy the above function code and put it a separate R-script.
-    * In RStudio: File -> New file ... -> R script
-2. Save the script as `catch_per_haul_per_length.R` in your project **R** directory (create the directory if not already available).
-3. When/if you want to use the function you simply run first:
+1. Are the number of records in the data.frame **d** as expected, given the number of records in the **tidy_st** data.frame?
+2. What does NA in the variable **n** stand for?
+3. How many NA's do we have?
+4. Can you think of a way replace the NA's with a proper value (hint check the document for the `ifelse`-function)
 
-```{r, eval = FALSE}
-source("R/catch_per_haul_per_length.R")
+```{r, echo = FALSE}
+# table(is.na(d$n))
+d <-
+  tidy_st %>% 
+  # lets only take some relevant variable
+  select(id, year, lon = shootlong, lat = shootlat, sq = subarea) %>% 
+  left_join(le) %>% 
+  mutate(n = ifelse(is.na(n), 0, n))
 ```
-
 
 </div>
 </div>
 
-#### Checking if things work
 
-Lets start from a clean slate by removing all the objects from our global working directory:
+Let's calculate some summary statistics over the years:
 
 ```{r}
-rm(list = ls())
+d.sum <-
+  d %>% 
+  group_by(year) %>% 
+  summarise(n.stations = n(),
+            m = mean(n),
+            q25 = quantile(n, 0.25),
+            q50 = quantile(n, 0.50),
+            q75 = quantile(n, 0.75))
 ```
 
-Now we need to load the data in again as well as the function we just generated and saved:
+and plot it:
+
 ```{r}
-load("data/nsibts_tidy.rda")
-source("R/catch_per_haul_per_length.R")
+d.sum %>% 
+  ggplot(aes(year)) +
+  geom_pointrange(aes(y = q50, ymin = q25, ymax = q75))
 ```
-... and then run from start using the `catch_per_haul_per_length`-function:
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+1. Plot the mean and the median on the same graph
+2. Standardise both statistics and plot them. Are the abundance trends the same?
+3. Modify your code by calculating approximate catch in kg per haul and repeat all the exploration done so far.
+4. Try a different species.
+
+```{r, eval = FALSE, echo = FALSE}
+d.sum %>% 
+  select(year, m, q50) %>% 
+  gather(statistics, value, -year) %>% 
+  group_by(statistics) %>% 
+  mutate(value = value/mean(value)) %>% 
+  ggplot(aes(year, value, colour = statistics)) +
+  geom_point() +
+  geom_line() +
+  expand_limits(y = 0)
+```
+
+</div>
+</div>
+
+# Catch distribution
+___
+
+Lets start from scratch and repeat the above calculation:
+```{r}
+st <- 
+  tidy_st %>% 
+  as_tibble() %>% 
+  select(id, year, lon = shootlong, lat = shootlat, sq = subarea)
+d <- 
+  tidy_le %>% 
+  as_tibble() %>% 
+  filter(latin == "Gadus morhua") %>% 
+  mutate(b = n * 0.01 * length^3 / 1000) %>% 
+  group_by(id) %>% 
+  summarise(n = sum(n),
+            b = sum(b)) %>% 
+  right_join(st) %>% 
+  mutate(n = ifelse(is.na(n), 0, n),
+         b = ifelse(is.na(b), 0, b))
+```
+
+Let's select a year of interest and create a map of the catch per haul:
+
+```{r}
+d %>% 
+  filter(year %in% c(2005)) %>% 
+  ggplot(aes(lon, lat, size = b)) +
+  geom_point() +
+  coord_quickmap()
+```
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+1. Given what you have learned in [Plotting spatial data](pre_ggplot2.html), modify the above plot code to make it more informative for the reader.
+2. Given what you have learned in [Plotting spatial data](pre_ggplot2.html), create a code to calculate and display mean biomass by ICES statistical rectangle.
+
+```{r, eval = FALSE, echo = FALSE}
+xlim <- c(-5, 15)
+ylim <- c(49, 63)
+m <- map_data("worldHires", xlim = xlim, ylim = ylim)
+p <- 
+  ggplot(m) +
+  theme_bw() +
+  geom_polygon(aes(long, lat, group = group), fill = "grey") +
+  coord_quickmap(xlim = xlim, ylim = ylim, expand = FALSE) +
+  labs(x = NULL, y = NULL)
+d.2005 <- d %>% filter(year %in% c(2005))
+p +
+  geom_point(data = d.2005, aes(lon, lat, size = b), alpha = 0.3, colour = "red") +
+  scale_size_area(max_size = 10)
+```
+
+</div>
+</div>
+
+# Length frequency distributions
+___
+
+In the above we have ignored the length information in the data. Lets make some simple summarization by length:
+
 ```{r}
 d <-
   tidy_le %>% 
-  filter(latin %in% "Melanogrammus aeglefinus") %>% 
-  catch_per_haul_per_length()
+  filter(latin == "Melanogrammus aeglefinus") %>% 
+  as_tibble() %>% 
+  # round fish length to the nearest 0.5 cm
+  mutate(length = floor(length) + 0.5) %>% 
+  # summarise the abundance by length
+  group_by(id, length) %>% 
+  summarise(n = sum(n)) %>% 
+  ungroup()
 ```
 
-In the above example we:
-
-* Passed the length dataframe as the **first** argument in our `catch_per_haul_per_length`-function
-* We did not override the default values for the additional parameters.
-
-
-**Further readings**: A minimum example for [generating a package](b_packages.html).
-
-# Annual length frequency distributions
-___
-
-The first step is to sum the data in each length group by year:
+Lets just tally up the total number of fish caught by year. The information on the year is in the station table so we need to join it to the length table before we do the summation:
 ```{r}
 d <-
   d %>% 
   left_join(tidy_st %>% select(id, year)) %>% 
-  group_by(latin, year, length) %>% 
-  summarise(n = sum(n),
-            b = sum(b))
+  group_by(year, length) %>% 
+  summarise(n = sum(n) / 1e3)
 ```
 
-Recalling that the number of stations is not the same each year and noting that  stations were no fish of the species in question is observed are not accounted for in the length dataframe we need to take that into account before proceeding. Hence we must:
-
-* Calculate the number of stations taken each year
-* Join that with the length data
-* Calculate the mean number of fish caught in each length class
-
-```{r}
-st.no <- 
-  tidy_st %>% 
-  group_by(year) %>% 
-  summarise(N = n())
-d <-
-  d %>% 
-  left_join(st.no) %>% 
-  mutate(n = n / N,
-         b = b / N)
-```
-
-We are now ready to proceed with some visualization and inference:
-```{r}
+Lets look at some selected years:
+```{r, fig.height = 6}
 d %>% 
+  filter(year %in% c(1999:2005)) %>% 
   ggplot(aes(length, n)) +
-  geom_polygon(stat = "identity", fill = "grey") +
-  facet_wrap(~ year) +
-  scale_x_continuous(limits = c(9, 40))
+  geom_col() +
+  facet_grid(year ~ .)
 ```
 
 <div class="panel panel-warning">
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">
 
-1. What is the unit of abundance (y-axis)?
-2. What are the main patterns in the data?
-3. Think of a better way to present the data, e.g. over a limited range of year
-4. Modify that plot showing distribution of the biomass by length. What are the main differences?
+1. Modify the above code such that it represents distribution of biomass by length.
+2. From the distribution by length create summary statistics by year, similar as we did at the beginning of the drill.
 
-```{r, echo = FALSE, eval = FALSE}
-d %>% 
-  filter(year %in% 1999:2004) %>% 
+```{r, eval = FALSE, echo = FALSE}
+tidy_le %>% 
+  filter(latin == "Melanogrammus aeglefinus") %>% 
+  as_tibble() %>% 
+  # round fish length to the nearest 0.5 cm
+  mutate(length = floor(length) + 0.5) %>% 
+  # summarise the abundance by length
+  group_by(id, length) %>% 
+  summarise(n = sum(n)) %>% 
+  ungroup() %>% 
+  mutate(b = n * 0.01 * length^3 / 1000) %>% 
+  left_join(tidy_st %>% select(id, year)) %>% 
+  group_by(year, length) %>% 
+  summarise(b = sum(b) / 1e3) %>% 
+  filter(year %in% c(1999:2005)) %>% 
   ggplot(aes(length, b)) +
-  geom_polygon(stat = "identity", fill = "grey") +
-  facet_grid(year ~ .) +
-  scale_x_continuous(limits = c(9, 40))
+  geom_col() +
+  facet_grid(year ~ .)
 ```
 
 </div>
 </div>
-
-```{r}
-d %>% 
-  filter(year %in% 1999:2013) %>% 
-  ggplot(aes(length, factor(year), height = n)) +
-  geom_joy(scale = 3.5, stat = "identity", alpha = 0.2, fill = "red") +
-  scale_x_continuous(limits = c(9, 40)) +
-  theme_joy() +
-  labs(x = "Length [cm]", y = NULL)
-```

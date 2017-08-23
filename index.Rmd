@@ -68,7 +68,7 @@ ___
 
 * [Plotting spatial data](pre_ggplot2.html) - eh
 * [Relational data](pre_joins.html) - bth
-* [Case example - DATRAS](pre_case.html) - eh
+* [Exercises using DATRAS data](pre_case.html) - eh
 * Work on your own data
     * Start thinking about creating a presentation of your application to the group. See e.g. [this](http://www.hafro.is/~einarhj/education/tcrenv2016/adhoc/Multispecies_IGFS_DATRAS_maps.html) presentation from a "fellow" of last years course.
     * Ask us if you hit a stumbling block, we get paid for this

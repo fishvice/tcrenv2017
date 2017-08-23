@@ -62,7 +62,7 @@ p4 <- p + geom_polygon()
 plot_grid(p1, p2, p3, p4)
 ```
 
-The above sweep of plots demonstrate that background maps are just a set of longitudinal and latitudinal data that are **ordered** in a specific way (check help file for `geom_line` vs `geom_path`).
+The above sweep of plots demonstrate that background maps are just a set of longitudinal and latitudinal data that are **arrange**-ed in a specific way (check help file for `geom_line` vs `geom_path`).
 
 ## Projections
 
@@ -100,7 +100,7 @@ Here there are two additional element introduced:
 <div class="panel-heading">Exercise</div>
 <div class="panel-body">
 
-1. Play around by plotting different regions or areas
+1. Play around by selecting and plotting different regions or areas
 2. Read the `coord_map` help file for projections other than the default "mercator". Try to create a map that looks something along:
 
 ```{r, echo = FALSE}
@@ -242,7 +242,7 @@ m2 +
 
 ## Shapefiles
 
-Myriads of useful shapefiles are available on the web, include on the ices web. An example is the shapefile that contains the 10 roundish areas of the North Sea. We can obtain it directly from within R via:
+Myriads of useful shapefiles are available on the web, including the ices web. An example is the shapefile that contains the 10 "NS-IBTS roundfish areas" of the North Sea. We can obtain it directly from within R via:
 
 * First we use the `download.file` function, specifying the web location and the destination of where we want to store the file.
 * Unzip the file using `unzip` function specifying where we want the content of the zipped file to be stored. 
