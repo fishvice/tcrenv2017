@@ -13,12 +13,12 @@ A short piece of code demonstrating fine-scale gridding.
 
 ### Generate some artifical data
 
-Generate a small data set of one million rows:
+Generate a small spatial dataframe of one million observations (imagine these are vms-pings of from vessels while trawling):
 ```{r}
 library(tidyverse)
-df <- data_frame(lon = rnorm(1e6, -28, 2),
-                 lat = rnorm(1e6, 64,  2),
-                 effort = rnorm(1e6, 1000, 200))
+df <- data_frame(lon =    rnorm(n = 1e6, mean =  -28, sd =   6),
+                 lat =    rnorm(n = 1e6, mean =   64, sd =   0.3),
+                 effort = rnorm(n = 1e6, mean = 1000, sd = 200))  # unit in minutes
 ```
 
 ### Create a gridding functions
@@ -57,7 +57,7 @@ d <-
   df %>% 
   mutate(sq = encode_zchords(lon, lat, dx = 0.05, dy = 0.025), type = "zchords") %>% 
   group_by(sq) %>% 
-  summarise(effort = sum(effort)) %>% 
+  summarise(effort = sum(effort) / 60/1000) %>% # scale to lets say thousand hours
   separate(sq, c("lon", "lat"), sep = ":", convert = TRUE, remove = FALSE)
 ```
 
@@ -75,5 +75,44 @@ d %>%
   ggplot(aes(lon, lat, fill = effort)) +
   geom_raster() +
   coord_quickmap()
+```
+
+### What to do about all this white space in the html-documentation??
+
+... code pending, we are still working on this `floor`-issue ... :-).
+
+below is just a placeholder for code-segments that may be a seeder for a solution:
+
+```{r, eval = FALSE}
+
+ranges <- data_frame(x.range = c(-10, -22),
+                     y.range = c(64, 66))
+
+x.center <- sum(ranges$x.range) / 2
+y.center <- sum(ranges$y.range) / 2
+
+# compute distance corresponding to 1 degree in either direction
+# from the center
+x.dist <- ggplot2:::dist_central_angle(x.center + c(-0.5, 0.5), rep(y.center, 2))
+y.dist <- ggplot2:::dist_central_angle(rep(x.center, 2), y.center + c(-0.5, 0.5))
+# NB: this makes the projection correct in the center of the plot and
+#     increasingly less correct towards the edges. For regions of reasonnable
+#     size, this seems to give better results than computing this ratio from
+#     the total lat and lon span.
+
+# scale the plot with this aspect ratio
+ratio <- y.dist / x.dist
+
+
+ggplot2:::dist_central_angle <- function (lon, lat)
+{
+  lat <- lat * pi/180
+  lon <- lon * pi/180
+  hav <- function(x) sin(x/2)^2
+  ahav <- function(x) 2 * asin(x)
+  n <- length(lat)
+  ahav(sqrt(hav(diff(lat)) + cos(lat[-n]) * cos(lat[-1]) *
+              hav(diff(lon))))
+}
 ```
 
