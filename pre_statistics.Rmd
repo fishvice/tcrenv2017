@@ -32,8 +32,8 @@ library(modelr)
 ### Getting example data into R
 
 ```{r,message=FALSE,warning=FALSE}
-minke <- read_csv("http://www.hafro.is/~einarhj/data/minke.csv")
-load(url("http://www.hafro.is/~einarhj/data/nsibts_tidy.rda"))
+minke <- read_csv("data/minke.csv")
+load("data/nsibts_tidy.rda")
 ```
 
 and do a bit of data processing:
@@ -115,6 +115,7 @@ In addition to finding the optimal values of $\alpha$ and $\beta$ we want to kno
 $$H_0 : \qquad \beta = 0 $$
 vs.
 $$H_1 : \qquad \beta \neq 0 $$
+
 ### Linear models in R
 
 R provides a suite of tools for model building. One of the simplest types of models, linear regression models, are created using the `lm` function:
@@ -289,12 +290,54 @@ plot(fit.reduced)
 ```
 
 # Generalised linear models
-In addition to linear model R has support for generalised linear model (glm) and generalised additive model (gam). These essentially behave similarly as its linear model counter part. The generalised linear model can build a linear model where the response variable is non-gaussian, such as counts data and proportions. To illustrate how this 
+In addition to linear model R has support for generalised linear model (glm) and generalised additive model (gam). These essentially behave similarly as its linear model counter part. The generalised linear model can build a linear model where the response variable is non-gaussian, such as counts data and proportions. To illustrate how this let's build a model for maturity as a function of length. To fit this model we need to separate the immmature fish from the mature fish in our data set.
+```{r}
+d.mat <- 
+  d %>% 
+  filter(!is.na(maturity)) %>% 
+  ## immature = 0, else mature
+  mutate(m = ifelse(maturity %in% c(1,51,61),0,1)) 
+```
 
-# Non-linear regression
+and now we want to regress the `m` variable to length. Notice that `m` only takes the value 0 or 1 so a regular linear model does not fit. You will need to use a different type of model, a logistic regression, i.e. a model that can handle binomial data. In this is done using the `glm` function with a logistic link function:
+```{r}
+fit <- glm(m ~ length, data = d.mat, family = binomial)
+summary(fit)
+```
+
+To plot the data:
+
+```{r}
+d.mat %>% 
+  add_predictions(fit) %>% 
+  ## need to transform the predictions into probabilities
+  mutate(pred = plogis(pred)) %>% 
+  ggplot(aes(length,pred)) + geom_line()
+```
+
+Now the formula for the $l_{50}$ is $-\alpha/\beta$ which we can calulate using the `tidy` function:
+```{r}
+fit %>% 
+  tidy() %>% 
+  summarise(l50 = -estimate[1]/estimate[2])
+```
+
+You can the continue to build the model exactly as with the `lm` function. Other types of data can be handled with different regression link functions, see the help for the `family` function.
+
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+Build a model for maturity at age for cod and calculate the $a_50$
+
+</div>
+</div>
+
+# Non-linear models
 Now say we want to fit a growth curve to our minke whale data. Typically this would by a Von Bertalanffy growth curve of the form:
 $$ l = L_{\infty}(1-e^{-k(a-t_0)})$$
-How do we do this in R?
+How do we do this in R? 
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
 ggplot(minke,aes(age,length)) + geom_point() + theme_bw() + ylab('Length') + xlab('Age')
@@ -409,6 +452,7 @@ chisq.test(d2$sex,d2$year)
 ```
 
 and again we can use `tidy` to get the estimates and test statistics from the test:
+
 ```{r}
 chisq.test(d2$sex,d2$year) %>% 
   tidy()
@@ -420,8 +464,8 @@ chisq.test(d2$sex,d2$year) %>%
 <div class="panel-body">
 
 
-* Is the proportion of fish caught using a fly significantly different from other gear types? 
-* Are the number of releases significantly different between the sexes?
+* Is the proportion of immature fish significantly different between the sexes? 
+* Are the number of caught by different vessels significantly different between the sexes?
 
 
 </div>
@@ -502,9 +546,19 @@ As an example we can ask if the variances in length are constant between the sex
 bartlett.test(d2$length,
               d2$sex)
 ```
-### Exercise
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
+
 * Do males and females differ significantly in weight?
 * What is the confidence interval for the mean length of males?
+
+
+</div>
+</div>
+
 
 
 # Analysis of variance
@@ -574,6 +628,8 @@ ls.cont %>% filter(p.value < 0.05)
 ## Two way anova example
 As an example of how to do a two way anova with interactions, consider length by sex and year: 
 ```{r}
+d <- d %>% 
+  filter(sex %in% c('M','F'))
 ggplot(d,aes(year,length, group=interaction(round(year),sex),fill = sex)) +
   geom_boxplot()
 ```
@@ -591,9 +647,22 @@ drop1(two.way,test='F')
 ```
 here we see that the interaction is significant. 
 
-### Excercise 
+
+
+<div class="panel panel-warning">
+<div class="panel-heading">Exercise</div>
+<div class="panel-body">
+
 
 * Test if the weight is significantly different by year
+
+
+</div>
+</div>
+
+# Other methods
+
+There is a plethora of other modeling methods implemented in the different R-packages, such as random effects models, random forest, gam models, case-crossover models, latent variable models etc.. 
 
 
 
