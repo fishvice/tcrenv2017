@@ -88,6 +88,8 @@ ___
 ### Bits and pieces
 ___
 
+#### [High resolution gridding](b_highresolutiongridding.html)
+
 #### [Generating a package](b_packages.html)
 
 #### [Working with strings](b_strings.html)
