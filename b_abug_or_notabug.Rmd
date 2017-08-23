@@ -1,0 +1,41 @@
+---
+title: "A ggplot2 bug??"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+### Preamble
+
+Assume upfront that all codes may have bugs. If your found a bug, well you **may** have found one. Just make sure that it is not a bug in your own head, before you start shame-blaming the guy/gal which spent a lot of time on a lot of code.
+
+### A bug in the coord_map function??
+
+Rubio wanted to plot the ICCAT region on Wednesday. The code she had was:
+
+```{r}
+library(tidyverse)
+map_data("world") %>%
+  ggplot(aes(x = long, y = lat, group = group)) +
+  theme_bw() +
+  geom_polygon(fill = "grey") +
+  scale_y_continuous(NULL) +
+  scale_x_continuous(NULL) +
+  coord_map(xlim = c(-120,60), ylim = c(-60,70))
+```
+
+Which obviously resulted in something unexpected. If one runs the following command in R (only replaced `coord_map` with `coord_quickmap`) things appear as expected:
+
+```{r}
+map_data("world") %>%
+  ggplot(aes(x = long, y = lat, group = group)) +
+  theme_bw() +
+  geom_polygon(fill = "grey") +
+  scale_y_continuous(NULL) +
+  scale_x_continuous(NULL) +
+  coord_quickmap(xlim = c(-120,60), ylim = c(-60,70))
+```
+
+Is this a bug in my head or a bug in the code???? Should I file an issue on github?
