@@ -32,7 +32,7 @@ For the purpose of this exercise the column of interest are:
 ## Suggested procedure
 ___
 
-* Read in the data from the [excel document](../data-raw/ICES Assessment Summary database 20160303.xlsx)
+* Read in the data from the [excel document](http://www.hafro.is/~einarhj/education/tcrenv2016/data-raw/ICES%20Assessment%20Summary%20database%2020160303.xlsx)
 * Plot the mortality trend by different ecoregions
 * Plot some measure of the mean and variability of the terminal mortality estimates (that would be fishing mortality in year 2014) by e.g. ecoregion and/or some selected species.
 * For each stock, calculate the ration of the contemporary fishing mortality and the fishing mortality estimated in the last assessment. Plot the retrospective patterns for some some selected species.

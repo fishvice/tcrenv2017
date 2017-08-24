@@ -1,6 +1,7 @@
 ---
 title: "High resolution gridding"
-output: html_document
+output: 
+  html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,12 +14,12 @@ A short piece of code demonstrating fine-scale gridding.
 
 ### Generate some artifical data
 
-Generate a small data set of one million rows:
+Generate a small spatial dataframe of one million observations (imagine these are vms-pings of from vessels while trawling):
 ```{r}
 library(tidyverse)
-df <- data_frame(lon = rnorm(1e6, -28, 2),
-                 lat = rnorm(1e6, 64,  2),
-                 effort = rnorm(1e6, 1000, 200))
+d <- data_frame(lon =    rnorm(n = 1e6, mean =  -28, sd =   6),
+                lat =    rnorm(n = 1e6, mean =   64, sd =   0.3),
+                effort = rnorm(n = 1e6, mean = 1000, sd = 200))  # unit in minutes
 ```
 
 ### Create a gridding functions
@@ -53,17 +54,17 @@ encode_zchords <- function(x, y, dx = 1, dy = 0.5 * dx, invalids = TRUE) {
 
 Here we use a 0.05 decimal degree resolution or grid for the lon, 0.025 for the lat:
 ```{r}
-d <- 
-  df %>% 
+df <- 
+  d %>% 
   mutate(sq = encode_zchords(lon, lat, dx = 0.05, dy = 0.025), type = "zchords") %>% 
   group_by(sq) %>% 
-  summarise(effort = sum(effort)) %>% 
+  summarise(effort = sum(effort) / 60/1000) %>% # scale to lets say thousand hours
   separate(sq, c("lon", "lat"), sep = ":", convert = TRUE, remove = FALSE)
 ```
 
 What do we have:
 ```{r}
-glimpse(d)
+glimpse(df)
 ```
 
 The character variable **sq** is the coded "square". Here, differently from e.g. the ICES statistical rectangle or the csquare encoding system the mid points for lon and lat are embedded in the square encoding, separated by a colon. Hence getting the value of the lon and the lat is as simple as calling the now hopefully familiar `separate`-function.
@@ -71,9 +72,60 @@ The character variable **sq** is the coded "square". Here, differently from e.g.
 ### The plot
 
 ```{r}
-d %>% 
+df %>% 
   ggplot(aes(lon, lat, fill = effort)) +
   geom_raster() +
   coord_quickmap()
 ```
 
+### What to do about all this white space in the html-documentation??
+
+As seen from above the plot takes up a lot of white space above and below the plot. This is both because the figure is a map and hence has a certain "aspect ratio" as well as the definition of fig.width and fig.height (here use the default). We could try to manually play around with the fig.height, but if one were to do a lot of plots of different xy-dimensions this becomes tedious. There is a chunk option call fig.asp which we could also play with.
+
+Luckily arguments at the head of a code chunk can take value calculated in R. Lets create a function that calculates the aspect ratio of the dimensions of the data:
+
+```{r}
+aspect_ratio <- function(df) {
+  ranges <- data.frame(x.range = range(df$lon),
+                       y.range = range(df$lat))
+  
+  x.center <- sum(ranges$x.range) / 2
+  y.center <- sum(ranges$y.range) / 2
+  
+  # compute distance corresponding to 1 degree in either direction
+  # from the center
+  x.dist <- ggplot2:::dist_central_angle(x.center + c(-0.5, 0.5), rep(y.center, 2))
+  y.dist <- ggplot2:::dist_central_angle(rep(x.center, 2), y.center + c(-0.5, 0.5))
+  # NB: this makes the projection correct in the center of the plot and
+  #     increasingly less correct towards the edges. For regions of reasonnable
+  #     size, this seems to give better results than computing this ratio from
+  #     the total lat and lon span.
+  
+  # scale the plot with this aspect ratio
+  ratio <- x.dist / y.dist
+  
+  return(ratio)
+  
+}
+
+```
+
+Now we need to calculate the aspect ratio before the code chunk that renders the plot is run:
+```{r}
+ratio <- aspect_ratio(df)
+```
+
+The next step is to create the plot. On top of the following code chunk I have specified "```{r, fig.asp = ratio}":
+
+```{r, fig.asp = ratio}
+df %>% 
+  ggplot(aes(lon, lat, fill = effort)) +
+  theme(plot.margin = margin(0, 0, 0, 0)) +
+  geom_raster() +
+  coord_quickmap() +
+  theme(legend.position = "none")
+```
+
+And now I can continue with the rest of the report, with at least a little more white space than we had before. Additional tweaks are needed, but this was not looked into during the course.
+
+Happy report coding ...

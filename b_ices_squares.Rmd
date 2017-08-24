@@ -1,0 +1,62 @@
+---
+title: "ICES statistical squares"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+A question was asked how to get ICES rectangle onto a map. Here is a simple demonstration:
+```{r}
+library(tidyverse)
+library(cowplot)
+ices.squares <- 
+  # create a grid, with midpoints for the lon and the lat
+  expand.grid(lon = seq(-40.5, 60.5, by = 1),
+              lat = seq(0.25, 89.25, by = 0.5)) %>% 
+  # find the ICES rectangle name
+  mutate(sq = geo::d2ir(lat, lon)) %>% 
+  drop_na() 
+
+# plot some area of interest:
+ices.squares %>% 
+  filter(between(lon, -28, -10),
+         between(lat, 63, 67)) %>% 
+  ggplot(aes(lon, lat, label = sq)) +
+  geom_text(angle = 45) +
+  scale_x_continuous(breaks = seq(-40, 60, by = 1)) +
+  scale_y_continuous(breaks = seq(0, 89, by = 0.5)) +
+  coord_quickmap() +
+  theme(panel.grid.minor.x = element_line(0),
+        panel.grid.minor.y = element_line(0))
+```
+
+If you only want the ICES grid on your map, try e.g.:
+```{r}
+m <- map_data("world", region = "Iceland")
+d <- read_csv("data/minke.csv")
+p1 <- ggplot() +
+  theme_bw() +
+  geom_polygon(data = m, aes(long, lat, group = group), fill = "grey") +
+  geom_hline(yintercept = seq(63, 67, by = 0.5), colour = "grey90") +
+  geom_vline(xintercept = seq(-30, -10, by = 1), colour = "grey90") +
+  geom_point(data = d, aes(lon, lat)) +
+  theme(panel.grid.major = element_line(0),
+        panel.grid.minor = element_line(0)) +
+  scale_x_continuous(NULL,  breaks = seq(-22, 10, by = 2)) +
+  coord_quickmap(xlim = range(d$lon), ylim = range(d$lat))
+# here just a different order of the layers:
+p2 <- ggplot() +
+  theme_bw() +
+  geom_hline(yintercept = seq(63, 67, by = 0.5), colour = "grey90") +
+  geom_vline(xintercept = seq(-30, -10, by = 1), colour = "grey90") +
+  geom_polygon(data = m, aes(long, lat, group = group), fill = "grey") +
+  geom_point(data = d, aes(lon, lat)) +
+  theme(panel.grid.major = element_line(0),
+        panel.grid.minor = element_line(0)) +
+  scale_x_continuous(NULL,  breaks = seq(-22, 10, by = 2)) +
+  coord_quickmap(xlim = range(d$lon), ylim = range(d$lat))
+plot_grid(p1, p2)
+```
+

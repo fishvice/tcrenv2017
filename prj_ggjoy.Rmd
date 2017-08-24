@@ -1,0 +1,43 @@
+---
+title: "ggjoy"
+output: 
+  html_document
+---
+
+This exercise focuses on:
+
+* Installing a new package (ggjoy)
+* Reading the help manual for that package or try to get information from the internet on how it operates.
+* Trying to create a single pipable code starting from the tidy_ag dataframe and ending with a plot of density distribution of length by age for a selected species that looks something like this:
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(ggjoy)
+load("data/nsibts_tidy.rda")
+```
+
+```{r}
+p <-
+  tidy_ag %>% 
+  filter(latin == "Scomber scombrus", !is.na(age),
+         age < 12) %>% 
+  select(age, length) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = length, y = age, group = age, height = ..density..)) +
+  geom_joy(alpha = 0.3, fill = "red") +
+  scale_y_continuous(breaks = c(1:13)) +
+  scale_x_continuous(breaks = seq(10, 45, by = 5)) +
+  theme(panel.grid.minor.x = element_line(0),
+        panel.grid.minor.y = element_line(0))
+p
+```
+
+With one singel addition function you can change the plot to this:
+```{r}
+ p + coord_flip()
+```
+

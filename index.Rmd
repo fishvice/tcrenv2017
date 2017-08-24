@@ -90,6 +90,8 @@ ___
 
 #### [High resolution gridding](b_highresolutiongridding.html)
 
+#### [Getting ICES squares on a map](b_ices_squares.html)
+
 #### [Generating a package](b_packages.html)
 
 #### [Working with strings](b_strings.html)
@@ -105,11 +107,11 @@ ___
 ### Potential projects
 ___
 
+#### [Finish the exercise in Plotting spatial data](pre_ggplot2.html)
+
+#### [ggjoy plot](prj_ggjoy.html)
+
 #### [Good environmental status](prj_ges.html)
-
-#### [Logbook data](prj_log.html)
-
-**TODO**: Revamp or drop
 
 #### [Viewing stock summary statistics](prj_ss.html)
 
