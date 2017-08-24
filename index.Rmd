@@ -90,6 +90,8 @@ ___
 
 #### [High resolution gridding](b_highresolutiongridding.html)
 
+#### [Getting ICES squares on a map](b_ices_squares.html)
+
 #### [Generating a package](b_packages.html)
 
 #### [Working with strings](b_strings.html)
