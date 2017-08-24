@@ -102,6 +102,8 @@ ___
 
 #### [Tidying DATRAS](p_tidydatras.html) - could be moved to projects
 
+#### [Loops in R](b_loops.html)
+
 #### ...
 
 ### Potential projects
