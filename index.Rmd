@@ -105,11 +105,11 @@ ___
 ### Potential projects
 ___
 
+#### [Finish the exercise in Plotting spatial data](pre_ggplot2.html)
+
+#### [ggjoy plot](prj_ggjoy.html)
+
 #### [Good environmental status](prj_ges.html)
-
-#### [Logbook data](prj_log.html)
-
-**TODO**: Revamp or drop
 
 #### [Viewing stock summary statistics](prj_ss.html)
 
