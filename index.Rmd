@@ -100,8 +100,6 @@ ___
 
 #### [Tidying DATRAS](p_tidydatras.html) - could be moved to projects
 
-#### [A ggplot2 bug??](a_bug_or_notabug.html)
-
 #### ...
 
 ### Potential projects
