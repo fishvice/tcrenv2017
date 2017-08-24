@@ -1,0 +1,140 @@
+---
+title: "Programming in R"
+output: 
+  html_document:
+    fig_height: 4
+    fig_width: 8
+    highlight: haddock
+    theme: united
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+minke <- read_csv('data/minke.csv')
+```
+
+
+# Conditional statements
+
+It is often so that we would like some parts of our code to run only if some condition is fulfilled
+We use `if` sentences for that.
+
+```{r,eval=FALSE}
+if(condition){
+  ## this runs if the condition(s) are fulfilled
+}
+```
+
+As a dummy example 
+
+```{r}
+x <- 10
+## check if x is greater than 0
+if(x>0){
+  print('x is positive')
+}
+```
+
+Sometimes we would like to check for more than one condition. We can use a combination of `if` and `else` sentences for that
+
+```{r,eval=FALSE}
+if(condition_1){
+  ## this runs if condition 1 is fulfilled,
+  ## then we skip the else-sentences below
+} else if(condition_2){
+  ## this runs if condition 2 is fulfilled,
+  ## then we skip the else-sentence below
+} else{
+  ## this runs of neither condition 1 or 2 are fulfilled
+}
+
+```
+
+So to continue with the dummy example:
+
+```{r}
+x <- 10
+## check if x > 10
+if(x>10){
+  print('x is greater than 10')
+} else if(x>=0){
+  print('x is less than 10 but greater than or equal to 0')
+} else {
+  print('x is negative')
+}
+```
+
+
+It is often so that we only have two conditions and they need to be vectorised. We can use the `ifelse` function for these cases
+
+```{r,eval=FALSE}
+ifelse(condition,
+       'this runs if the condition is fulfilled',
+       'this runs if the condition is not fulfilled')
+```
+
+
+As an example we can replace NA’s from data using the `ifelse` function:
+
+```{r}
+
+x <- c(1,2,3,NA,4,5)
+## find all missing entries and replace them
+x <- ifelse(is.na(x),0,x)
+x
+```
+
+# Loops
+
+### `for`-loop
+
+We use a `for`-loop if we need some part of our code to run more than one time and we know how often it should run. We use an index/counter that counts how often we enter the loop:
+
+```{r,eval=FALSE}
+for(index in vector){
+  ## This code runs as often as the length of the vector
+}
+
+```
+
+Most of the time we write for loops like this:
+```{r,eval=FALSE}
+for(i in 1:10){
+  ## do some stuff
+  print(i)
+}
+```
+
+
+### `while` loops
+
+While-loops are similar to for-loops, but they are used when we need some part of our code to run more
+than one time but we dont know how often it sould run. 
+
+```{r, eval=FALSE}
+
+while(condition){
+  ## This code runs while the condition(s) are fulfilled
+}
+
+```
+
+As a dummy example we can calculate the mean length of minke whales using a `for`-loop
+
+```{r}
+## find the number of entries in the data
+n <- nrow(minke)
+## calculate the mean length old fashion way
+ML <- 0
+for(i in 1:n){
+  ML <- ML + minke$length[i]
+}
+ML <- ML/n
+ML
+```
+
+
+
