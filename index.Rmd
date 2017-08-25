@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 __Time__: 2017-08-21 10:00 - 2017-08-25 15:00
 
 __Location__:
-```{r, fig.width = 9, fig.height = 3, message = FALSE, echo=FALSE}
+```{r, fig.width = 9, fig.height = 3, message = FALSE, echo=FALSE, warning=FALSE}
 library(leaflet)
 content <- paste(sep = "<br/>",
   "<b><a href='http://www.ices.dk'>ICES</a></b>",
