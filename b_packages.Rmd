@@ -3,8 +3,6 @@ title: "Generating a package"
 subtitle: "Minimum example"
 output: 
   html_document:
-    fig_height: 3
-    fig_width: 4
     highlight: haddock
     theme: united
     toc: no
@@ -34,40 +32,39 @@ Basically within R-studio the minimum needed is the following:
     - Save the R-script with the file name "encode_zchords.R" in the R-directory that already resides within the current project.
 6. Do: Build > Build and Reload
 7. If the steps above go smoothly you should by the end of last command see that your library (tcrtools) has been loaded into your current session.
-8. Then do:
-```{r, eval = FALSE}
+8. Then start a new project and do:
+```{r}
+library(tidyverse)
+library(lubridate)
+# if you have not build the tcrtools-package on your computer you can do:
+# devtools::install_github("fishvice/tcrenv2017/tcrtools")
+library(tcrtools)
+
+# Read the helpfile for our function:
+?encode_zchords
+
+# Do some plot
 read_csv("data/logbook_station.csv") %>% 
-         # get the year from the date variable
+  # get the year from the date variable
   mutate(year = year(date),
          # create the sq-code using the function in the tcrtools package
-         sq = encode_zchords(lon, lat)) %>% 
+         sq = encode_zchords(lon, lat, dx = 0.25)) %>% 
   # prepare summarizing by year and square
   group_by(year, sq) %>% 
   # sum the stuff
   summarize(effort = sum(towtime / 60, na.rm = TRUE)) %>% 
   # get the central coordinate position from the varible sq, make it numerical
-  separate(sq, c(lon, lat), sep = ":", convert = TRUE) %>% 
+  separate(sq, c("lon", "lat"), sep = ":", convert = TRUE) %>% 
   # plot the stuff as raster
-  ggplot(aes(lon, lat, fill = effort)) +
-  geom_raster() +
+  ggplot() +
+  theme_bw() +
+  geom_raster(aes(lon, lat, fill = effort)) +
+  geom_polygon(data = map_data("world", region = "Iceland"),
+               aes(long, lat, group = group)) +
   # use a viridis colour scheme instead of the ggplot2 default "blues"
   scale_fill_continuous(type = "viridis", option = "B", direction = -1) +
   # create an approximate aspect ration
-  coord_quickmap()
+  coord_quickmap() +
+  labs(x = NULL, y = NULL)
 ```
-
-If later in your live, you want to use the function(s) in this package in any other project you simply to the usual:
-
-```
-library(tcrtools)
-```
-
-Since we have at least one function that is "documented", get the documentation by:
-```
-?encode_zchords
-```
-
-
-
-
 
