@@ -25,10 +25,26 @@ d <- data_frame(lon =    rnorm(n = 1e6, mean =  -28, sd =   6),
 ### Create a gridding functions
 
 ```{r}
-# code from ziggy stardust
-#   note that here there is not validation/testing done
-#   read: use stuff at own risk
-
+#' @title encode_zchords
+#'
+#' @description
+#'
+#' The function takes x and y values and converts them to a grid whose value
+#' represent the midpoints given dx and dy.
+#' 
+#' The main code is shamelessly stolen from siggi with some tiny bit of
+#' stardust added (if only in the name).
+#'
+#' @param x A numerical vector, normally a longitude
+#' @param y A numerical vector, normally a latitude
+#' @param dx Resolution on the x-axis, normally in decimal degrees (default 1 degree)
+#' @param dy Resolution on the y-axis, normally in decimal degrees (default half of the longitude)
+#' @param invalids A logical (default TRUE), convert values outside mercator ranges to NA.
+#'
+#' @return A character vector where the grid "coding" are the midpoints separated 
+#' by a colon. This vector can be split up by e.g. the tidyr:separate function.
+#' @export
+#'
 encode_zchords <- function(x, y, dx = 1, dy = 0.5 * dx, invalids = TRUE) {
 
   x.brks <- seq(floor(min(x)),ceiling(max(x)),dx)

@@ -15,26 +15,59 @@ output:
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-
 Your best source when it comes to learning the ins and outs of package generation is the book [R packages](https://github.com/fishvice/tcrenv2016.git).
 
 Basically within R-studio the minimum needed is the following:
 
-1. File > New Project > New Directory > R Package > type in package name.
-2. Install the package `roxygen2` if you have not already done so.
-3. Suggest you then do: Tools > Project Options ... and
+1. Install the package `roxygen2` if you have not already done so.
+2. File > New Project > New Directory > R Package > type in package name.
+    - Suggest you use the name "tcrtools".
+3. Suggest you then do: Tools > Project Options > Build tools > Configure and make sure that the following "tick-boxes" are "ticked" - see figure below:
+
 <div style="width:300px; height=300px">
-![options](http://r-pkgs.had.co.nz/screenshots/build-reload-opts-2.png)
+![](http://r-pkgs.had.co.nz/screenshots/build-reload-opts-2.png)
 </div>
-4. Put some functions (scripts) you have created into the R-directory
-5. Open the .R documents, click anywhere inside the function code and do: Code > Insert Roxygen Skeleton
+
+4. Put some functions (R scripts) you have created into the R-directory
+    - Here I suggest, just to put something in, to open a blank R-script (File > New File > R Script).
+    - Copy the **whole** code-chunk (including comments at the top) for the `encode_zchords`-function that is located in the [High resolution gridding](b_highresolutiongridding.html)-document (see header: "Create a gridding functions") on the course home page into the blank R-script file.
+    - Save the R-script with the file name "encode_zchords.R" in the R-directory that already resides within the current project.
 6. Do: Build > Build and Reload
-
-If the steps above go smoothly you should by the end of last command see that your library has been loaded into your current session.
-
-Then when you want to use the functions in this package in any other r-project you simply to the usual:
+7. If the steps above go smoothly you should by the end of last command see that your library (tcrtools) has been loaded into your current session.
+8. Then do:
+```{r, eval = FALSE}
+read_csv("data/logbook_station.csv") %>% 
+         # get the year from the date variable
+  mutate(year = year(date),
+         # create the sq-code using the function in the tcrtools package
+         sq = encode_zchords(lon, lat)) %>% 
+  # prepare summarizing by year and square
+  group_by(year, sq) %>% 
+  # sum the stuff
+  summarize(effort = sum(towtime / 60, na.rm = TRUE)) %>% 
+  # get the central coordinate position from the varible sq, make it numerical
+  separate(sq, c(lon, lat), sep = ":", convert = TRUE) %>% 
+  # plot the stuff as raster
+  ggplot(aes(lon, lat, fill = effort)) +
+  geom_raster() +
+  # use a viridis colour scheme instead of the ggplot2 default "blues"
+  scale_fill_continuous(type = "viridis", option = "B", direction = -1) +
+  # create an approximate aspect ration
+  coord_quickmap()
 ```
-library(mypackage)
+
+If later in your live, you want to use the function(s) in this package in any other project you simply to the usual:
+
 ```
+library(tcrtools)
+```
+
+Since we have at least one function that is "documented", get the documentation by:
+```
+?encode_zchords
+```
+
+
+
 
 
