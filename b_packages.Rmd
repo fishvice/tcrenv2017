@@ -1,5 +1,5 @@
 ---
-title: "Generating a package"
+title: "On functions and generation of an  R-package"
 subtitle: "Minimum example"
 output: 
   html_document:
@@ -7,17 +7,98 @@ output:
     theme: united
     toc: no
     toc_float: no
+bibliography: mybib.bib
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-Your best source when it comes to learning the ins and outs of package generation is the book [R packages](https://github.com/fishvice/tcrenv2016.git).
+## Writing and using own functions
+____
+
+When using R one frequently starts using the same sets of codes or scripts. Rewriting codes can quickly become repetitious and is prone to error generations. If you are using the same set of scripts in different projects management of them become a nightmare, they clutter your R-script or documentation space and not the least you start forgetting where some useful set of scripts reside on your computer. If the above is familiar to you it is time to start writing your own functions and store them in some specific directory on your computer.
+
+First, lets create some R-code for converting age to length according to the von Bertalanffy growth curve:
+$$ l = L_{\infty}(1-e^{-k(a-t_0)})$$
+
+```{r}
+library(tidyverse)
+d <- 
+  data_frame(age = 0:15) %>% 
+  mutate(length = 120 * (1 - exp(-(0.15 * (age - 0)))))
+```
+
+Now we may not always have the exact code in our head each time, so lets create a function and then call the function in the code (Ignore the comments at the beginning of the script for now, it will become apparent in the next section on generating packages):
+
+```{r}
+#' @title vb
+#'
+#' @description Calculates length from age given the von Bertalanffy parameters
+#'
+#' @param age A numeric vector of age
+#' @param loo A value for L-infinity
+#' @param k A value for k
+#' @param to A value for t-zero
+#'
+#' @return
+#' @export
+#'
+vb <- function(age, loo = 120, k = 0.15, to = 0) {
+  
+  length <- loo * (1 - exp(-(k * (age - to))))
+  
+  return(length)
+
+}
+```
+
+There where only three things needed to turn a script into a function:
+
+* The first line where we name the function and pass the data (*age*, *loo*, *k* and *to*) to the function call as **arguements**
+* Wrapped the script inside `{ }`
+* For the last three arguments of the function we passed a default value but this is not really needed (and may create some confusion because these parameters are stock specific, but lets just say that these are parameters for the stock you most frequently work with).
+
+Note that when you run the above script you will see that you have generated an object (object class is a function) **vb** in your global environment:
+
+```{r}
+ls()
+```
+
+We can now use the function in our script:
+
+```{r}
+library(tidyverse)
+d <- 
+  data_frame(age = 0:15) %>% 
+  mutate(length1 = vb(age),          # use the default values from the function
+         length2 = vb(age, 60, 1.2)) # override the default for loo and k
+glimpse(d)
+```
+
+Here the function is inside a particular R-script or rmarkdown document in a particular project it. To make it accessible for other projects it is best to store the function in a specific "global" directory and then source the function.
+
+So:
+1. Copy the above function code and put it a separate R-script.
+    * In RStudio: File -> New file ... -> R script
+2. Save the script as e.g. `myfunctions.R` in a directory of your choice.
+3. When/if you want to use the function you simply run first:
+
+```{r, eval = FALSE}
+source("path/to/script/directory/myfunctions.R")
+```
+
+In [@wickham2016r] there is a nice chapter on [Functions](http://r4ds.had.co.nz/functions.html).
+
+
+## Generating an R-package
+___
+
+An R-packages is just a set of functions and data with hopefully some documentation (not absolutely necessary) that reside in a directory that has a specific structure. One can easily create a private packages that contains functions that one frequently reuses. This document snippet provides the minimum steps needed to generate a private R-package - but including the step of documenting the functions (the thing you get when doing e.g. ```?mean```). If you want to learn more about R-packages, the best current source is the book [R packages](http://r-pkgs.had.co.nz) [@wickham2015r].
 
 Basically within R-studio the minimum needed is the following:
 
-1. Install the package `roxygen2` if you have not already done so.
+1. Install the package `roxygen2` if you have not already done so (this is needed if you want to make documentation the easy way).
 2. File > New Project > New Directory > R Package > type in package name.
     - Suggest you use the name "tcrtools".
 3. Suggest you then do: Tools > Project Options > Build tools > Configure and make sure that the following "tick-boxes" are "ticked" - see figure below:
@@ -26,13 +107,59 @@ Basically within R-studio the minimum needed is the following:
 ![](http://r-pkgs.had.co.nz/screenshots/build-reload-opts-2.png)
 </div>
 
+By making this **extra** step you ensure that the `roxygen2` package converts special documentation syntax (see below) into some nasty LateX-code (something you may not want to know anything about).
+
 4. Put some functions (R scripts) you have created into the R-directory
     - Here I suggest, just to put something in, to open a blank R-script (File > New File > R Script).
-    - Copy the **whole** code-chunk (including comments at the top) for the `encode_zchords`-function that is located in the [High resolution gridding](b_highresolutiongridding.html)-document (see header: "Create a gridding functions") on the course home page into the blank R-script file.
-    - Save the R-script with the file name "encode_zchords.R" in the R-directory that already resides within the current project.
-6. Do: Build > Build and Reload
-7. If the steps above go smoothly you should by the end of last command see that your library (tcrtools) has been loaded into your current session.
-8. Then start a new project and do:
+    - Copy the **whole** code-chunk for the von Bertalanffy function into a new R-script
+    - Copy the **whole** code-chunk (including comments at the top) for the `encode_zchords`-function that is located in the [High resolution gridding](b_highresolutiongridding.html)-document (see header: "Create a gridding functions") on the course home page into another blank R-script file. It is also provided below for your convenience:
+```{r}
+#' @title encode_zchords
+#'
+#' @description
+#'
+#' The function takes x and y values and converts them to a grid whose value
+#' represent the midpoints given dx and dy.
+#' 
+#' The main code is shamelessly stolen from siggi with some tiny bit of
+#' stardust added (if only in the name).
+#'
+#' @param x A numerical vector, normally a longitude
+#' @param y A numerical vector, normally a latitude
+#' @param dx Resolution on the x-axis, normally in decimal degrees (default 1 degree)
+#' @param dy Resolution on the y-axis, normally in decimal degrees (default half of the longitude)
+#' @param invalids A logical (default TRUE), convert values outside mercator ranges to NA.
+#'
+#' @return A character vector where the grid "coding" are the midpoints separated 
+#' by a colon. This vector can be split up by e.g. the tidyr:separate function.
+#' @export
+#'
+encode_zchords <- function(x, y, dx = 1, dy = 0.5 * dx, invalids = TRUE) {
+
+  x.brks <- seq(floor(min(x)),ceiling(max(x)),dx)
+  x.ints <- findInterval(x, x.brks, all.inside = TRUE)
+  x <- (x.brks[x.ints] + x.brks[x.ints + 1]) / 2
+
+  y.brks <- seq(floor(min(y)),ceiling(max(y)),dy)
+  y.ints <- findInterval(y, y.brks, all.inside = TRUE)
+  y <- (y.brks[y.ints] + y.brks[y.ints + 1]) / 2
+
+  if(invalids) {
+    x <- ifelse(x >= -180 & x <= 180, x, NA)
+    y <- ifelse(y >= -90  & y <= 90 , y, NA)
+  }
+
+  return(paste(round(x,6), round(y,6), sep = ":"))
+
+}
+```
+
+The first part (the green bit) in the two function chunks above are just a specific text-syntax (learn more by reading the book cited above) what will be turned into a documentation (by the `roxygen`-package) for the function. The remainder is just some line of R-code wrapped into a function-object.
+
+6. Save both R-script with the suggested file name "vb.R" and "encode_zchords.R" in the R-directory that already resides within the current project.
+7. Do: Build > Build and Reload
+8. If the steps above go smoothly you should by the end of last command see that your library (tcrtools) has been loaded into your current session.
+9. Then start a new project and do:
 ```{r}
 library(tidyverse)
 library(lubridate)
@@ -41,30 +168,18 @@ library(lubridate)
 library(tcrtools)
 
 # Read the helpfile for our function:
+?vb
 ?encode_zchords
 
-# Do some plot
-read_csv("data/logbook_station.csv") %>% 
+# Lets use the encode_zhords function:
+read_csv("http://www.hafro.is/~einarhj/data/logbook_station.csv") %>% 
   # get the year from the date variable
-  mutate(year = year(date),
-         # create the sq-code using the function in the tcrtools package
-         sq = encode_zchords(lon, lat, dx = 0.25)) %>% 
-  # prepare summarizing by year and square
-  group_by(year, sq) %>% 
-  # sum the stuff
-  summarize(effort = sum(towtime / 60, na.rm = TRUE)) %>% 
-  # get the central coordinate position from the varible sq, make it numerical
-  separate(sq, c("lon", "lat"), sep = ":", convert = TRUE) %>% 
-  # plot the stuff as raster
-  ggplot() +
-  theme_bw() +
-  geom_raster(aes(lon, lat, fill = effort)) +
-  geom_polygon(data = map_data("world", region = "Iceland"),
-               aes(long, lat, group = group)) +
-  # use a viridis colour scheme instead of the ggplot2 default "blues"
-  scale_fill_continuous(type = "viridis", option = "B", direction = -1) +
-  # create an approximate aspect ration
-  coord_quickmap() +
-  labs(x = NULL, y = NULL)
+  mutate(sq = encode_zchords(lon, lat, dx = 0.25)) %>% 
+  glimpse()
 ```
+
+Note: The whole content of the directory that is generated in the steps above are available as a directory (as well as being a separate R-project) on our course [home source page](https://github.com/fishvice/tcrenv2017/tree/master/tcrtools).
+
+#### References
+
 

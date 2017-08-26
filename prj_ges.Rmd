@@ -23,7 +23,7 @@ A general discussion for these indicators can be found [here](http://ec.europa.e
 ## Suggested procedure
 ___
 
-Follow the procedure set out by [Greenstreet et. al (2015)](prj/11_Technical_Background_Biodiversity_and_Ecosystem_Services__marine__2015.pdf) and calculate the following metrics for Baltic region (BITS survey):
+Follow the procedure set out by [Greenstreet et. al (2015)](http://www.hafro.is/~einarhj/education/tcrenv2016/prj/11_Technical_Background_Biodiversity_and_Ecosystem_Services__marine__2015.pdf) and calculate the following metrics for Baltic region (BITS survey):
 
 * Biomass: $B_t=\sum_{s}\sum_{l}n_{slt}*c_sl^b_s$
 * Abundance: $A_t=\sum_s\sum_l n_{slt}$
@@ -74,7 +74,7 @@ load("data/nsibts_tidy.rda")
 
 # create a unique species table
 bio <-
-  le %>% 
+  tidy_le %>% 
   select(latin) %>%
   distinct() %>%
   drop_na() %>% 
@@ -130,7 +130,6 @@ save(bio, file="data/life_history_parameters.rda")
 
 ```{r, echo = FALSE, message = FALSE}
 load("data/life_history_parameters.rda")
-
 # Make assumption about a and b if not obtained from fishbase
 bio <-
   bio %>% 
@@ -141,8 +140,8 @@ bio <-
 
 # bundle all that is needed into one dataframe
 le <-
-  le %>% 
-  left_join(st %>% select(id, year)) %>% 
+  tidy_le %>% 
+  left_join(tidy_st %>% select(id, year)) %>% 
   left_join(bio)
 
 GES <- 

@@ -383,5 +383,5 @@ ___
 * The ggplot2 book in the making: https://github.com/hadley/ggplot2-book
     - A rendered version of the book: http://www.hafro.is/~einarhj/education/ggplot2
         - needs to be updates
-* R graphics cookbook: http://www.cookbook-r.com/Graphs/
+* R graphics cookbook: http://www.cookbook-r.com/Graphs
 
