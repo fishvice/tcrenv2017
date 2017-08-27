@@ -1,6 +1,5 @@
 ---
 title: "On functions and generation of an  R-package"
-subtitle: "Minimum example"
 output: 
   html_document:
     highlight: haddock
@@ -14,22 +13,29 @@ bibliography: mybib.bib
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-## Writing and using own functions
-____
+## Preamble
+___
 
 When using R one frequently starts using the same sets of codes or scripts. Rewriting codes can quickly become repetitious and is prone to error generations. If you are using the same set of scripts in different projects management of them become a nightmare, they clutter your R-script or documentation space and not the least you start forgetting where some useful set of scripts reside on your computer. If the above is familiar to you it is time to start writing your own functions and store them in some specific directory on your computer.
+
+In this section we deal with the above problem in two different ways:
+
+* Writing functions and storing them as R-scripts
+* Generating a private R-package (read: library)
+
+## Writing and using own functions
+____
 
 First, lets create some R-code for converting age to length according to the von Bertalanffy growth curve:
 $$ l = L_{\infty}(1-e^{-k(a-t_0)})$$
 
 ```{r}
 library(tidyverse)
-d <- 
-  data_frame(age = 0:15) %>% 
+data_frame(age = 0:15) %>% 
   mutate(length = 120 * (1 - exp(-(0.15 * (age - 0)))))
 ```
 
-Now we may not always have the exact code in our head each time, so lets create a function and then call the function in the code (Ignore the comments at the beginning of the script for now, it will become apparent in the next section on generating packages):
+Now we may not always have the exact formula for the von Bertalanffy growth curve in our head at a time when we need it. One solution is to create a function and make a "short-call" to the function in a code. Ignore the comments at the beginning of the script below, for now. That part will become a little bit more apparent in the next section, on generation of r-packages:
 
 ```{r}
 #' @title vb
@@ -57,9 +63,9 @@ There where only three things needed to turn a script into a function:
 
 * The first line where we name the function and pass the data (*age*, *loo*, *k* and *to*) to the function call as **arguements**
 * Wrapped the script inside `{ }`
-* For the last three arguments of the function we passed a default value but this is not really needed (and may create some confusion because these parameters are stock specific, but lets just say that these are parameters for the stock you most frequently work with).
+* For the last three arguments of the function we passed a default value but this is not really needed (and may create some confusion because these parameters are stock specific, but lets just imagine that the values set as default are for the stock you most frequently work with).
 
-Note that when you run the above script you will see that you have generated an object (object class is a function) **vb** in your global environment:
+Note that when you run the above script you will see that you have generated an object  **vb** (the object class is a function) in your global environment:
 
 ```{r}
 ls()
@@ -76,25 +82,33 @@ d <-
 glimpse(d)
 ```
 
-Here the function is inside a particular R-script or rmarkdown document in a particular project it. To make it accessible for other projects it is best to store the function in a specific "global" directory and then source the function.
+Here the function is inside a particular R-script or rmarkdown document in a particular project. To make it accessible for other projects it is best to store the function in a specific "global" directory and then source the function.
 
 So:
+
 1. Copy the above function code and put it a separate R-script.
     * In RStudio: File -> New file ... -> R script
 2. Save the script as e.g. `myfunctions.R` in a directory of your choice.
-3. When/if you want to use the function you simply run first:
+3. When/if you want to use the function in any **new** session in **any** project you simply run:
 
 ```{r, eval = FALSE}
+library(tidyverse)
 source("path/to/script/directory/myfunctions.R")
+data_frame(age = 0:15) %>% 
+  mutate(length = vb(age, 60, 1.2))
 ```
 
-In [@wickham2016r] there is a nice chapter on [Functions](http://r4ds.had.co.nz/functions.html).
+In [@wickham2016r] there is a nice chapter on [Functions](http://r4ds.had.co.nz/functions.html) that has ...
 
 
 ## Generating an R-package
 ___
 
-An R-packages is just a set of functions and data with hopefully some documentation (not absolutely necessary) that reside in a directory that has a specific structure. One can easily create a private packages that contains functions that one frequently reuses. This document snippet provides the minimum steps needed to generate a private R-package - but including the step of documenting the functions (the thing you get when doing e.g. ```?mean```). If you want to learn more about R-packages, the best current source is the book [R packages](http://r-pkgs.had.co.nz) [@wickham2015r].
+Firsly on semantics: What is known as an R-package is what we within our R-projects make availlable by calling `library`-function.
+
+What follows below is a **minimum** example.  If you want to learn more about generating an R-package, the best current source is the [R packages book](http://r-pkgs.had.co.nz) [@wickham2015r].
+
+An R-packages is just a set of functions and/or data with hopefully some documentation (not absolutely necessary) that reside in a directory that has a specific structure. One can easily create a private packages that contains functions that one frequently reuses. This document snippet provides the minimum steps needed to generate a private R-package - but including the step of documenting the functions (the thing you get when doing e.g. ```?mean```).
 
 Basically within R-studio the minimum needed is the following:
 
