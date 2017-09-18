@@ -92,6 +92,8 @@ ___
 
 #### [High resolution gridding](b_highresolutiongridding.html)
 
+#### [Points in polygons](b_points_in_polygons.html)
+
 #### [Getting ICES squares on a map](b_ices_squares.html)
 
 #### [Working with strings](b_strings.html)

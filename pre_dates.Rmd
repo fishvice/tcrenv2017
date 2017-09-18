@@ -11,6 +11,13 @@ output:
 ---
 
 ```{r, echo = FALSE}
+# https://stackoverflow.com/questions/37755037/how-to-add-code-folding-to-output-chunks-in-rmarkdown-html-documents
+```
+
+
+<script src="js/hide_output.js"></script>
+
+```{r, echo = FALSE}
 knitr::opts_chunk$set(warning = FALSE,
                       message = FALSE)
 ```
@@ -167,6 +174,7 @@ We observe that most hauls are taken in the beginning of the workweek and the nu
 
 1. Create a code that tally's up the number by weekday and country. Create a visualization of the data using a line and point layer.
 
+<div class="fold s o">
 ```{r, echo = FALSE, eval = FALSE}
 df %>% 
   mutate(wday = wday(timeshoot)) %>% 
@@ -177,18 +185,22 @@ df %>%
   geom_line(lwd = 1) +
   scale_color_brewer(palette = "Set1")
 ```
+</div>
 
 2. Create a code that tally's up the number of hauls by hour of the day
 
+<div class="fold s o">
 ```{r, echo = FALSE, eval = FALSE}
 df %>% 
   mutate(hour = hour(timeshoot)) %>% 
   group_by(hour) %>% 
   count()
 ```
+</div>
 
 3. Create a code that tally's the number of hauls by wday and hour. Try to create the following visualization:
 
+<div class="fold s o">
 ```{r, echo = FALSE}
 df %>% 
   mutate(wday = wday(timeshoot, label = TRUE), hour = hour(timeshoot)) %>% 
@@ -202,10 +214,12 @@ df %>%
   labs(x = NULL) +
   theme(legend.position = "none")
 ```
+</div>
 
 4. Bonus: Modify the above, such that country is represented by a facet.
 
-```{r, echo = FALSE, eval = FALSE}
+<div class="fold s o">
+```{r}
 df %>% 
   mutate(wday = wday(timeshoot, label = TRUE), hour = hour(timeshoot)) %>% 
   group_by(country, wday, hour) %>% 
@@ -218,6 +232,9 @@ df %>%
   theme(legend.position = "none") +
   facet_wrap(~ country)
 ```
+</div>
+
+If stuck, have take a peek at the [solution](solutions/pre_dates.R)
 
 </div>
 </div>
