@@ -85,20 +85,20 @@ The above product allows anybody interest to make a full copy of the course, eit
 ```
 git clone https://github.com/fishvice/tcrenv2017.git
 ```
-The 
+The source code for course is shared via the creative commons licence, allowing anybody to reuse any or all of the material produced for the course. 
 
 ## Deliverables
 
 The deliverance of the course deviated somewhat from the planned schedule because mainly because the coverage of each topic, including practical assignments took longer than anticipated. This resulted in that some of the topics (mainly function, packages and social coding) were only covered with brief lectures without participants hands on training.
 
-Each day started with a short discussion of the topics/assignments covered the previous day. During the deliverance emphasis was put on cooperative work and code sharing (including difficulties/stumbling blocks) among participants. Once the basic elements had been introduced within the first three days course participants were encouraged to work with their own data and problems, the instructors being at hand to suggest a solution. The participants data and issues tackled were quite diverse and included ... (BJARKI: Can you help here??).
+Each day started with a short discussion of the topics/assignments covered the previous day. During the deliverance emphasis was put on cooperative work and code sharing (including difficulties/stumbling blocks) among participants. Once the basic elements had been introduced within the first three days course participants were encouraged to work with their own data and problems, the instructors being at hand to suggest a solution. The participants data and issues tackled were quite diverse and included the automatic generation of cruise reports, animations of temporal changes in species distribution and interactions to big data sets located in a remote SQL database.   
 
 ## Lecturers
 
-* Bjarki Þór Elvarsson, Marine Research Institute, Iceland
-    - Bjarki is a statistician in the Fisheries Advisory Section of the Marine Research Institute, Reykjavík Iceland. He recently finished his phd in statistical methods related to stock assessment models. He has been a member of the Icelandic delegation to the scientific council of International whaling commission since 2010 and participated in various ICES working group meetings since 2013. R has been in his main working environment since 2004. 
-* Einar Hjörleifsson, Marine Research Institute, Iceland
-    - Einar is a fisheries scientist in Fisheries Advisory Section of the Marine Research Institute, Reykjavík Iceland. He has been involved in various ICES works since 1996 that spans the whole spectrum from ACFM membership up to working group chairing and participation. He has also been involved in the United Nation University Fisheries Training Program teaching stock assessment. R has been his primary working environment since 2009.
+* Bjarki Þór Elvarsson, Marine and Freshwater Research Institute, Iceland
+    - Bjarki is a statistician at the Demersal Division of the Marine and Freshwater Research Institute, Reykjavík Iceland. His main research focuses on statistical methods related to stock assessment models. He has been a member of the Icelandic delegation to the scientific council of International whaling commission since 2010 and participated in various ICES working group meetings since 2013. R has been in his main working environment since 2004. 
+* Einar Hjörleifsson, Marine and Freshwater Research Institute, Iceland
+    - Einar is a fisheries scientist at the Data Division of the Marine and Freshwater Research Institute, Reykjavík Iceland. He has been involved in various ICES works since 1996 that spans the whole spectrum from ACFM membership up to working group chairing and participation. He has also been involved in the United Nation University Fisheries Training Program teaching stock assessment. R has been his primary working environment since 2009.
 
 # Recommendation
 
