@@ -1,0 +1,117 @@
+---
+title: "Report of the training course in R environment"
+author: "Bjarki Þór Elvarsson and Einar Hjörleisson"
+output: html_document
+---
+
+# Summary
+
+
+# Background
+___
+
+## Context
+
+The R language is becoming the _Lingua franca_ both in data science in general as well as within the ICES community. Recent advancements within R have resulted in that R can no longer be considered as a specific statistical programming language but as a general scientific working environment. This broader environment has resulted in the R has become a natural component of reproducible data analysis and document writing.
+
+Various R packages (e.g. FLR, DATRAS, MSY, SURBAR, VMStools) have often been the backbone of ICES training course and/or workshops. These packages as well as courses are geared towards solving specific pending tasks that tend to come with requirements that the participants are reasonable proficient in basic R and that the input data are correctly formatted and available. Any of these requirements have been seen to pose problems.
+
+The course is aimed at covering the fundamental/generic basis of the grammar of data and graphics as well reproducible document writing where R is used as the sole working medium. Recent developments in the R community that are of interest to fisheries science will also be described.
+
+## Objective
+
+The objective of the course is to provide participants with a solid foundation in efficient use of the R environment using various typical and familiar fisheries data sets (landings data, catch data, survey data and tagging data) as case examples. Emphasis will be put on data munging and literate programming starting with "raw" data (individual stations, individual fish measurements, ...) and culminating with deliverance of publishable output produced from a single coded document file.
+
+By the end of the course, the participants:
+
+  * Will be able to import data from multitude of sources computer (i.e. own text files, excel, access, sql databases) and via the web.
+  * Will be able to clean, manipulate, explore, summarize and graph data. This includes being able to:
+      - Apply best practices in data preparation
+      - Present results graphically, highlighting significant results
+      - Merge, slice and dice various datasets
+  * Will be able to apply the principle of reproducible analysis and report writing from A through Z which are then deliverable through any of the current three common deliverable formats: .html, .pdf and .docx.
+  * Will be able to produce own functions and understand the principles of creating R packages and social version control coding (through www.github.com).
+
+## Level
+
+The course is targeted at fisheries scientist with already have some basic experience in R but are yet not proficient enough to write fluently code for data manipulation, exploration and writing own functions. We believe that some part of the course would also be beneficial to those that are currently productively using R in fisheries science but may along the way have skipped some of the basics and/or are unaware of recent advancements in the R environment when it comes to efficient data handling and processing.
+
+# Course Programme, Product, Deliverance and Instructors
+
+## Programme
+
+The schedule was as follows:
+
+### Day 1 - Monday
+
+* [Introduction](pre_intro.html)
+* [Getting data into R](pre_data.html)
+* [Getting started with ggplot](pre_ggplot.html)
+
+### Day 2 - Tuesday
+
+* 09:00 - 10:00 - recapitulation of yesterday
+* [Getting started with dplyr](pre_dplyr.html)
+* [Working with dates](pre_dates.html)
+* [Reproducible research with R](pre_markdown.html)
+
+
+### Day 3 - Wednesday
+
+* [Plotting spatial data](pre_ggplot2.html)
+* [Relational data](pre_joins.html)
+* [Exercises using DATRAS data](pre_case.html)
+* Work on preassigned project or on your own data or 
+    * Start thinking about creating a presentation of your application to the group. See e.g. [this](http://www.hafro.is/~einarhj/education/tcrenv2016/adhoc/Multispecies_IGFS_DATRAS_maps.html) presentation from a "fellow" of last years course.
+
+### Day 4 - Thursday
+
+* [Statistics in R](pre_statistics.html)
+* Work on own data
+* Participants presentation of work
+
+### Day 5 - Friday
+
+* [Generating a package](b_packages.html)
+* Introduction to version control (git) and social coding (www.github.com)
+* Participant presentation of work
+
+
+## Course products
+
+From the conception of the course through deliverance, all course material were developed and delivered using non-proprietary free software. In that spirit all the material was also made available as open source on a github repository (https://github.com/fishvice/tcrenv2017). The repository contains all source documents (lectures in the form of .Rmd and/or .Rnw). A webpage (http://www.hafro.is/~einarhj/education/tcrenv2017) based on that material was also generated and used in delivery of the course.
+
+The above product allows anybody interest to make a full copy of the course, either as a compiled zip-document (https://github.com/fishvice/tcrenv2017/archive/master.zip) or by simply typing in a terminal window on computers where the git program has been installed:
+```
+git clone https://github.com/fishvice/tcrenv2017.git
+```
+The 
+
+## Deliverables
+
+The deliverance of the course deviated somewhat from the planned schedule because mainly because the coverage of each topic, including practical assignments took longer than anticipated. This resulted in that some of the topics (mainly function, packages and social coding) were only covered with brief lectures without participants hands on training.
+
+Each day started with a short discussion of the topics/assignments covered the previous day. During the deliverance emphasis was put on cooperative work and code sharing (including difficulties/stumbling blocks) among participants. Once the basic elements had been introduced within the first three days course participants were encouraged to work with their own data and problems, the instructors being at hand to suggest a solution. The participants data and issues tackled were quite diverse and included ... (BJARKI: Can you help here??).
+
+## Lecturers
+
+* Bjarki Þór Elvarsson, Marine Research Institute, Iceland
+    - Bjarki is a statistician in the Fisheries Advisory Section of the Marine Research Institute, Reykjavík Iceland. He recently finished his phd in statistical methods related to stock assessment models. He has been a member of the Icelandic delegation to the scientific council of International whaling commission since 2010 and participated in various ICES working group meetings since 2013. R has been in his main working environment since 2004. 
+* Einar Hjörleifsson, Marine Research Institute, Iceland
+    - Einar is a fisheries scientist in Fisheries Advisory Section of the Marine Research Institute, Reykjavík Iceland. He has been involved in various ICES works since 1996 that spans the whole spectrum from ACFM membership up to working group chairing and participation. He has also been involved in the United Nation University Fisheries Training Program teaching stock assessment. R has been his primary working environment since 2009.
+
+# Recommendation
+
+In the waning hour of the course a discussion focusing on the documentation, deliverance and what may have been handled better by the instructors. The main comments on the latter were:
+
+* Provide guidance on naming of objects.
+* Allow more time in lecture on the assigned exercises.
+* Provide a better deliverance of the solution to the exercises (now stored within the Rmd-source documents).
+* The prearranged projects be categorized with respect to the issues they address. 
+* Set the frame structure in RStudio up such that the source code is on the left and the console is on the right (instead of below).
+
+# Annex 1: List of participants
+
+# Annex 2: Results of course evaluation questionnaire
+
+
