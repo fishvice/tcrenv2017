@@ -1,14 +1,22 @@
 ---
 title: "Report of the training course in R environment"
 author: "Bjarki Þór Elvarsson and Einar Hjörleisson"
-output: html_document
+output:
+  word_document:
+    reference_docx: ices_template.docx
+    toc: no
+  html_document: default
 ---
 
 # Summary
 
+The training course in the R environment took place at ICES Headquarters, in Copenhagen, Denmark from 21. August to 28. August 2017. The number of participants was 17, coming from 13 different institudes.
+
+The objective of the course was to provide participants with a solid foundation in efficient use of the R environment using various typical and familiar fisheries datasets as case examples. Emphasis was put on efficient data munging, data visualization using literate programming starting with "raw" data (individual stations, individual observation) and culminating with deliverance of publishable output produced from a single coded document file.
+
+From the conception of the course through deliverance, all course material were developed and delivered using non-proprietary free software and made available as open source (https://github.com/fishvice/tcrenv2017). A course webpage (http://www.hafro.is/~einarhj/education/tcrenv2017) based on the source code was generated and used throughout the course.
 
 # Background
-___
 
 ## Context
 
@@ -24,13 +32,13 @@ The objective of the course is to provide participants with a solid foundation i
 
 By the end of the course, the participants:
 
-  * Will be able to import data from multitude of sources computer (i.e. own text files, excel, access, sql databases) and via the web.
-  * Will be able to clean, manipulate, explore, summarize and graph data. This includes being able to:
-      - Apply best practices in data preparation
-      - Present results graphically, highlighting significant results
-      - Merge, slice and dice various datasets
-  * Will be able to apply the principle of reproducible analysis and report writing from A through Z which are then deliverable through any of the current three common deliverable formats: .html, .pdf and .docx.
-  * Will be able to produce own functions and understand the principles of creating R packages and social version control coding (through www.github.com).
+* Will be able to import data from multitude of sources computer (i.e. own text files, excel, access, sql databases) and via the web.
+* Will be able to clean, manipulate, explore, summarize and graph data. This includes being able to:
+    - Apply best practices in data preparation
+    - Present results graphically, highlighting significant results
+    - Merge, slice and dice various datasets
+* Will be able to apply the principle of reproducible analysis and report writing from A through Z which are then deliverable through any of the current three common deliverable formats: .html, .pdf and .docx.
+* Will be able to produce own functions and understand the principles of creating R packages and social version control coding (through www.github.com).
 
 ## Level
 
@@ -38,43 +46,40 @@ The course is targeted at fisheries scientist with already have some basic exper
 
 # Course Programme, Product, Deliverance and Instructors
 
+The training course in the R environment took place at ICES Headquarters, in Copenhagen, Denmark from 21. August to 28. August 2017. The number of participants was 17, coming from 13 different institudes.
+
 ## Programme
 
 The schedule was as follows:
 
-### Day 1 - Monday
+* **Day 1 - Monday**
+    * [Introduction](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_intro.html) 
+    * [Getting data into R](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_data.html) 
+    * [Getting started with ggplot](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_ggplot.html) 
+* **Day 2 - Tuesday**
+    * 09:00 - 10:00 - recapitulation of yesterday
+    * [Getting started with dplyr](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_dplyr.html)
+    * [Working with dates](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_dates.html)
+    * [Reproducible research with R](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_markdown.html)
+* **Day 3 - Wednesday**
+    * 09:00 - 10:00 - recapitulation of yesterday
+    * [Plotting spatial data](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_ggplot2.html)
+    * [Relational data](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_joins.html)
+    * [Exercises using DATRAS data](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_case.html)
+    * Work on preassigned projects or on your own data or 
+        * Start thinking about creating a presentation of your application to the group. See e.g. [this](http://www.hafro.is/~einarhj/education/tcrenv2016/adhoc/Multispecies_IGFS_DATRAS_maps.html) presentation from a "fellow" of last years course.
 
-* [Introduction](pre_intro.html)
-* [Getting data into R](pre_data.html)
-* [Getting started with ggplot](pre_ggplot.html)
+* **Day 4 - Thursday**
+    * 09:00 - 10:00 - recapitulation of yesterday
+    * [Statistics in R](http://www.hafro.is/~einarhj/education/tcrenv2017/pre_statistics.html)
+    * Work on assignments or own data
+    * Participants presentation of work
 
-### Day 2 - Tuesday
-
-* 09:00 - 10:00 - recapitulation of yesterday
-* [Getting started with dplyr](pre_dplyr.html)
-* [Working with dates](pre_dates.html)
-* [Reproducible research with R](pre_markdown.html)
-
-
-### Day 3 - Wednesday
-
-* [Plotting spatial data](pre_ggplot2.html)
-* [Relational data](pre_joins.html)
-* [Exercises using DATRAS data](pre_case.html)
-* Work on preassigned project or on your own data or 
-    * Start thinking about creating a presentation of your application to the group. See e.g. [this](http://www.hafro.is/~einarhj/education/tcrenv2016/adhoc/Multispecies_IGFS_DATRAS_maps.html) presentation from a "fellow" of last years course.
-
-### Day 4 - Thursday
-
-* [Statistics in R](pre_statistics.html)
-* Work on own data
-* Participants presentation of work
-
-### Day 5 - Friday
-
-* [Generating a package](b_packages.html)
-* Introduction to version control (git) and social coding (www.github.com)
-* Participant presentation of work
+* **Day 5 - Friday**
+    * [Generating a package](http://www.hafro.is/~einarhj/education/tcrenv2017/b_packages.html)
+    * Introduction to version control (git) and social coding (www.github.com)
+    * Participant presentation of work
+    * General discussion on the course
 
 
 ## Course products
@@ -91,7 +96,7 @@ The source code for course is shared via the creative commons licence, allowing 
 
 The deliverance of the course deviated somewhat from the planned schedule because mainly because the coverage of each topic, including practical assignments took longer than anticipated. This resulted in that some of the topics (mainly function, packages and social coding) were only covered with brief lectures without participants hands on training.
 
-Each day started with a short discussion of the topics/assignments covered the previous day. During the deliverance emphasis was put on cooperative work and code sharing (including difficulties/stumbling blocks) among participants. Once the basic elements had been introduced within the first three days course participants were encouraged to work with their own data and problems, the instructors being at hand to suggest a solution. The participants data and issues tackled were quite diverse and included the automatic generation of cruise reports, animations of temporal changes in species distribution and interactions to big data sets located in a remote SQL database.   
+Each day started with a short discussion of the topics/assignments covered the previous day. During the deliverance emphasis was put on cooperative work and code sharing (including difficulties/stumbling blocks) among participants. Once the basic elements had been introduced within the first three days course participants were encouraged to work with their own data and problems, the instructors being at hand to suggest solutions when issues arouse. The participants data and issues tackled were quite diverse and included the automatic generation of cruise reports, animations of temporal changes in species distribution and interactions to big data sets located in a remote SQL database.   
 
 ## Lecturers
 
@@ -101,6 +106,7 @@ Each day started with a short discussion of the topics/assignments covered the p
     - Einar is a fisheries scientist at the Data Division of the Marine and Freshwater Research Institute, Reykjavík Iceland. He has been involved in various ICES works since 1996 that spans the whole spectrum from ACFM membership up to working group chairing and participation. He has also been involved in the United Nation University Fisheries Training Program teaching stock assessment. R has been his primary working environment since 2009.
 
 # Recommendation
+
 
 In the waning hour of the course a discussion focusing on the documentation, deliverance and what may have been handled better by the instructors. The main comments on the latter were:
 
@@ -112,6 +118,8 @@ In the waning hour of the course a discussion focusing on the documentation, del
 
 # Annex 1: List of participants
 
+...
+
 # Annex 2: Results of course evaluation questionnaire
 
-
+...
